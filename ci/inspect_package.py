@@ -20,6 +20,7 @@ def unpack(prefix):
     with tarfile.open(fileobj=io.BytesIO(data)) as archive:
         for m in archive:
             p=pathlib.PurePosixPath(m.name); assert not p.is_absolute() and '..' not in p.parts
+            assert m.uid == 0 and m.gid == 0, ('non-root numeric owner', m.name, m.uid, m.gid)
             if m.isdir(): continue
             key=p.as_posix().removeprefix('./'); assert key not in result
             assert m.isfile(),(key,m.type)
@@ -33,6 +34,7 @@ assert fields['package']=='com.tsangbaby.dynamicstagex'
 assert fields['version']=='0.1.0~alpha1'
 assert fields['architecture']=='iphoneos-arm64e'
 assert 'firmware (>= 15.0)' in fields['depends'] and 'rootless-compat' not in fields.get('pre-depends','')
+assert 'roothide' in [p.strip().split()[0] for p in fields['depends'].split(',')]
 assert all(not p.startswith(('var/jb/','var/mobile/Library/pkgmirror/')) for p in payload)
 assert any(p.endswith('/DynamicStageX.dylib') for p in payload)
 assert any(p.endswith('/DynamicStageXPrefs.bundle/DynamicStageXPrefs') for p in payload)

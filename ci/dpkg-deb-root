@@ -1,0 +1,4 @@
+#!/bin/sh
+# Called directly by pinned RootHide Theos during packaging, never rewrites a built DEB.
+set -eu
+exec dpkg-deb --root-owner-group "$@"

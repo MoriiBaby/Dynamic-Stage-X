@@ -42,9 +42,9 @@ jobs:
           HOMEBREW_NO_AUTO_UPDATE: 1
         run: |
           set -euo pipefail
-          brew install make ldid xz zstd
+          brew install make ldid xz zstd dpkg
           echo "$(brew --prefix make)/libexec/gnubin" >> "$GITHUB_PATH"
-          brew list --versions make ldid xz zstd | tee build-evidence/packaging-tools.txt
+          brew list --versions make ldid xz zstd dpkg | tee build-evidence/packaging-tools.txt
       - name: Prepare pinned official RootHide Theos and SDK
         shell: bash
         run: bash ci/setup-theos.sh
@@ -62,7 +62,7 @@ jobs:
         run: |
           set -euo pipefail
           make clean
-          make package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=roothide TARGET=iphone:clang:16.5:15.0 -j2 2>&1 | tee build-evidence/theos-build.txt
+          make package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=roothide TARGET=iphone:clang:16.5:15.0 _THEOS_PLATFORM_DPKG_DEB="$PWD/ci/dpkg-deb-root" THEOS_PLATFORM_DEB_COMPRESSION_TYPE=xz THEOS_PLATFORM_DEB_COMPRESSION_LEVEL=6 -j2 2>&1 | tee build-evidence/theos-build.txt
           python3 ci/inspect_package.py packages build-evidence/package.json
           git rev-parse HEAD > build-evidence/source-commit.txt
           git diff --exit-code
