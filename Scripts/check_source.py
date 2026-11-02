@@ -74,7 +74,13 @@ class SourceContracts(unittest.TestCase):
             self.assertNotRegex(text, r'snapshotViewAfterScreenUpdates|UIGraphicsImageRenderer|AVPlayer')
             self.assertNotRegex(text, r'(?:majorVersion|operatingSystemVersion)\s*[><=]')
             self.assertNotRegex(text, r'\b(?:TODO|FIXME|fatalError)\b')
-        self.assertFalse((ROOT / '.github/workflows').exists())
+        workflows = ROOT / '.github/workflows'
+        if workflows.exists():
+            self.assertEqual({p.name for p in workflows.iterdir()}, {'build-roothide.yml'})
+            workflow = (workflows / 'build-roothide.yml').read_text()
+            self.assertIn('branches: [build/roothide-alpha1]', workflow)
+            self.assertIn('contents: read', workflow)
+            self.assertNotRegex(workflow, r'(?m)^\s+run:.*(?:make install|respring|ssh )')
 
     def test_state_and_cleanup_integration(self):
         source = self.text('Sources/Coordinator/DXCoordinator.swift')

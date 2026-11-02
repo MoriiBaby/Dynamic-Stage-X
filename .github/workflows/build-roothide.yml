@@ -1,0 +1,78 @@
+name: RootHide Mac test build
+
+on:
+  push:
+    branches: [build/roothide-alpha1]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dynamicstagex-roothide-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 35
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Select native Apple toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d /Applications/Xcode_16.4.app
+          sudo xcode-select --switch /Applications/Xcode_16.4.app/Contents/Developer
+          mkdir -p build-evidence
+          xcodebuild -version | tee build-evidence/xcode.txt
+          xcrun swiftc --version | tee build-evidence/swift.txt
+          xcrun clang --version | tee build-evidence/clang.txt
+          sw_vers | tee build-evidence/macos.txt
+          uname -m | tee build-evidence/runner-architecture.txt
+      - name: Install native packaging utilities
+        shell: bash
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+        run: |
+          set -euo pipefail
+          brew install make ldid xz zstd
+          echo "$(brew --prefix make)/libexec/gnubin" >> "$GITHUB_PATH"
+          brew list --versions make ldid xz zstd | tee build-evidence/packaging-tools.txt
+      - name: Prepare pinned official RootHide Theos and SDK
+        shell: bash
+        run: bash ci/setup-theos.sh
+      - name: Production core tests and local contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 Scripts/check_source.py 2>&1 | tee build-evidence/source-contracts.txt
+          python3 Tests/Core/verify_source_contract.py 2>&1 | tee build-evidence/core-contracts.txt
+          python3 Tests/Presentation/verify_source_contract.py 2>&1 | tee build-evidence/ui-contracts.txt
+          sh Tests/Bridge/run-local.sh 2>&1 | tee build-evidence/bridge-C.txt
+          swift test 2>&1 | tee build-evidence/swift-XCTest.txt
+      - name: Compile sign and package native RootHide
+        shell: bash
+        run: |
+          set -euo pipefail
+          make clean
+          make package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=roothide TARGET=iphone:clang:16.5:15.0 -j2 2>&1 | tee build-evidence/theos-build.txt
+          python3 ci/inspect_package.py packages build-evidence/package.json
+          git rev-parse HEAD > build-evidence/source-commit.txt
+          git diff --exit-code
+      - name: Upload test package and build evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: Dynamic-Stage-X-roothide-alpha1-${{ github.run_id }}
+          path: |
+            packages/*.deb
+            build-evidence/
+          if-no-files-found: error
+          retention-days: 14
