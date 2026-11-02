@@ -6,6 +6,7 @@ final class DXPreferencesSmokeApp: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     private var failures: [String] = []
     private var checks = 0
+    private var dataSourceType: String?
     private let domain = "com.tsangbaby.dynamicstagex" as CFString
 
     func application(_ application: UIApplication,
@@ -46,20 +47,29 @@ final class DXPreferencesSmokeApp: UIResponder, UIApplicationDelegate {
             for _ in 0..<10 { table.reloadData(); table.layoutIfNeeded() }
         }
         check(exception == nil, "real UIKit reload/layout threw: \(exception ?? "")")
-        check(table.dataSource === list, "child is not the table data source")
+        guard let dataSource = table.dataSource else {
+            check(false, "UIKit table has no effective data source"); finish(baseline: false, exception: exception); return
+        }
+        // UITableViewController may install a UIKit forwarding data source. Test the
+        // effective callback results, not an undocumented internal pointer identity.
+        dataSourceType = String(describing: type(of: dataSource))
+        check(dataSource.tableView(table, numberOfRowsInSection: 0) == 4,
+              "effective data source does not route setting rows")
+        check(dataSource.tableView(table, numberOfRowsInSection: 1) == 1,
+              "effective data source does not route about rows")
         check(table.delegate === list, "child is not the table delegate")
         check(table.numberOfSections == 2, "wrong section count")
         check(table.numberOfRows(inSection: 0) == 4, "missing setting rows")
         check(table.numberOfRows(inSection: 1) == 1, "missing about row")
         let expected = ["启用 Dynamic Stage X", "窗口圆角", "窗口间隔", "触发位置"]
         for row in 0..<4 {
-            let cell = list.tableView(table, cellForRowAt: IndexPath(row: row, section: 0))
+            let cell = dataSource.tableView(table, cellForRowAt: IndexPath(row: row, section: 0))
             check(cell.textLabel?.text == expected[row], "row title mismatch \(row)")
         }
         check(list.tableView(table, titleForFooterInSection: 1)?.contains("0.1.0-alpha2") == true,
               "about footer did not identify alpha2")
         let old = CFPreferencesCopyAppValue("enabled" as CFString, domain)
-        let cell = list.tableView(table, cellForRowAt: IndexPath(row: 0, section: 0))
+        let cell = dataSource.tableView(table, cellForRowAt: IndexPath(row: 0, section: 0))
         if let toggle = cell.accessoryView as? UISwitch {
             toggle.setOn(true, animated: false)
             toggle.sendActions(for: .valueChanged)
@@ -99,6 +109,7 @@ final class DXPreferencesSmokeApp: UIResponder, UIApplicationDelegate {
     private func finish(baseline: Bool, exception: String?) {
         let report: [String: Any] = [
             "passed": failures.isEmpty, "checks": checks, "failures": failures,
+            "effective_data_source_class": (dataSourceType as Any?) ?? NSNull(),
             "baseline": baseline, "captured_exception": (exception as Any?) ?? NSNull(),
             "scope": "real iOS Simulator UIKit; Preferences superclass is a test double, not the real Preferences host",
             "device_settings_tested": false
