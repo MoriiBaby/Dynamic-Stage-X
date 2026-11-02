@@ -1,7 +1,6 @@
 #import <UIKit/UIKit.h>
-// Intentionally minimal and stable across SDK header sets. Do not additionally import
-// a dumped PSListController declaration: differing inherited protocol lists would make
-// the Swift controller's explicit data-source conformance vary by SDK.
-// The real superclass and its instance layout are supplied by Preferences.framework.
-@interface PSListController : UIViewController
+// Only the Preferences navigation container, not its specifier/table owner.
+// The runtime class and its layout are supplied by Preferences.framework.
+// Our UIKit child owns all UITableViewDataSource/Delegate selectors.
+@interface PSViewController : UIViewController
 @end

@@ -1,39 +1,46 @@
 import UIKit
 import CoreFoundation
 
-/// UIKit-only settings surface: no third-party application-list dependency.
+/// Preferences navigation container. It deliberately has no table delegate/data-source methods.
 @objc(DXPreferencesController)
-public final class DXPreferencesController: PSListController, UITableViewDataSource, UITableViewDelegate {
-    private let domain = "com.tsangbaby.dynamicstagex" as CFString
-    private let table = UITableView(frame: .zero, style: .insetGrouped)
-    private let keys = ["enabled", "cornerRadius", "gap", "triggerSide"]
-    private let titles = ["启用 Dynamic Stage X", "窗口圆角", "窗口间隔", "触发位置"]
-
+public final class DXPreferencesController: PSViewController {
     public override func viewDidLoad() {
         super.viewDidLoad()
         title = "Dynamic Stage X"
-        table.translatesAutoresizingMaskIntoConstraints = false
-        table.dataSource = self
-        table.delegate = self
-        view.addSubview(table)
+        view.backgroundColor = .systemGroupedBackground
+        let contents = DXSettingsListController(style: .insetGrouped)
+        addChild(contents)
+        let contentView = contents.view!
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(contentView)
         NSLayoutConstraint.activate([
-            table.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            table.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            table.topAnchor.constraint(equalTo: view.topAnchor),
-            table.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            contentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            contentView.topAnchor.constraint(equalTo: view.topAnchor),
+            contentView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+        contents.didMove(toParent: self)
     }
-    public override func viewWillAppear(_ animated: Bool) {
+}
+
+/// Owns one UIKit table; never supplies callbacks to PSListController's specifier table.
+private final class DXSettingsListController: UITableViewController {
+    private let domain = "com.tsangbaby.dynamicstagex" as CFString
+    private var table: UITableView { tableView }
+    private let keys = ["enabled", "cornerRadius", "gap", "triggerSide"]
+    private let titles = ["启用 Dynamic Stage X", "窗口圆角", "窗口间隔", "触发位置"]
+
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         CFPreferencesAppSynchronize(domain)
         table.reloadData()
     }
-    public func numberOfSections(in tableView: UITableView) -> Int { 2 }
-    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int { section == 0 ? keys.count : 1 }
-    public func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
-        section == 0 ? "竖屏上下双窗。键盘出现时输入应用临时占据键盘上方区域，收起键盘后恢复。系统目标 iOS 15.0+，具体能力以运行时适配与验证为准。" : "开发者 Tsangbaby · 0.1.0-alpha1\n此设置不会安装、重启或强制关闭任何应用。"
+    override func numberOfSections(in tableView: UITableView) -> Int { 2 }
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int { section == 0 ? keys.count : 1 }
+    override func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+        section == 0 ? "竖屏上下双窗。键盘出现时输入应用临时占据键盘上方区域，收起键盘后恢复。系统目标 iOS 15.0+，具体能力以运行时适配与验证为准。" : "开发者 Tsangbaby · 0.1.0-alpha2\n此设置不会安装、重启或强制关闭任何应用。"
     }
-    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .value1, reuseIdentifier: nil)
         guard indexPath.section == 0 else {
             cell.textLabel?.text = "关于 Dynamic Stage X"
@@ -61,7 +68,7 @@ public final class DXPreferencesController: PSListController, UITableViewDataSou
         }
         return cell
     }
-    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         guard indexPath.section == 0, indexPath.row > 0 else { return }
         if indexPath.row == 3 {

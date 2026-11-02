@@ -31,7 +31,7 @@ for line in control['control'].decode().splitlines():
     if not line or line[0].isspace(): continue
     key,value=line.split(':',1); key=key.lower(); assert key not in fields,key; fields[key]=value.strip()
 assert fields['package']=='com.tsangbaby.dynamicstagex'
-assert fields['version']=='0.1.0~alpha1'
+assert fields['version']=='0.1.0~alpha2'
 assert fields['architecture']=='iphoneos-arm64e'
 assert 'firmware (>= 15.0)' in fields['depends'] and 'rootless-compat' not in fields.get('pre-depends','')
 assert 'roothide' in [p.strip().split()[0] for p in fields['depends'].split(',')]

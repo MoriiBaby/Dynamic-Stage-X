@@ -2,7 +2,7 @@
 ARCHS = arm64 arm64e
 TARGET = iphone:clang:latest:15.0
 INSTALL_TARGET_PROCESSES = SpringBoard
-PACKAGE_VERSION = 0.1.0~alpha1
+PACKAGE_VERSION = 0.1.0~alpha2
 
 # Select a native scheme explicitly. Do not convert an already-built DEB.
 #   make package THEOS_PACKAGE_SCHEME=roothide
