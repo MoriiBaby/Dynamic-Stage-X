@@ -164,7 +164,7 @@ final class DXRoundedPane: UIView {
         guard acceptsHostedTouches, point.x.isFinite, point.y.isFinite else { return false }
         let visible = layer.presentation() ?? layer
         let local = CGPoint(x: point.x - visible.bounds.minX, y: point.y - visible.bounds.minY)
-        let path = (clippingMask.presentation() as? CAShapeLayer)?.path ?? clippingMask.path
+        let path = clippingMask.presentation()?.path ?? clippingMask.path
         return path?.contains(local, using: .winding, transform: .identity) ?? false
     }
 
@@ -197,7 +197,7 @@ final class DXRoundedPane: UIView {
 
     internal func capturePresentation() -> Presentation {
         let visible = layer.presentation() ?? layer
-        let path = (clippingMask.presentation() as? CAShapeLayer)?.path ??
+        let path = clippingMask.presentation()?.path ??
             clippingMask.path ?? DXContinuousCornerPath.make(size: visible.bounds.size, radius: radius)
         return Presentation(frame: visible.frame, radius: DXContinuousCornerPath.sampledRadius(in: path),
                             alpha: CGFloat(visible.opacity), path: path)

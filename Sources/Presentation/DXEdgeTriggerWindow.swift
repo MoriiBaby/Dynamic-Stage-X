@@ -163,7 +163,7 @@ final class DXEdgeTriggerWindow: UIWindow, UIGestureRecognizerDelegate {
         return edgeRoot.hitTest(edgeRoot.convert(point, from: self), with: event)
     }
 
-    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+    override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         guard gestureRecognizer === pan, contextIsUsable else { return false }
         return DXEdgeTriggerPolicy.mayBegin(translation: pan.translation(in: self), velocity: pan.velocity(in: self))
     }
