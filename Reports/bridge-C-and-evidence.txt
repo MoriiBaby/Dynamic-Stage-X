@@ -1,0 +1,6 @@
+COMMAND: sh Tests/Bridge/run-local.sh
+STDOUT:
+PASS: 21053 production ABI/lease/corpus checks (C only; no iOS runtime claims)
+PASS: 93 pinned public-header SHA256 checks; 14 source-candidate declarations (not runtime verification)
+
+STDERR:

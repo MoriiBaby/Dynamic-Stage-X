@@ -1,0 +1,10 @@
+Source: DynamicStageX
+Package: com.tsangbaby.dynamicstagex
+Name: Dynamic Stage X
+Version: 0.1.0~alpha1
+Architecture: iphoneos-arm64e
+Description: Independent Swift-first live top-and-bottom app windows for iOS 15.0 and later.
+Maintainer: Tsangbaby
+Author: Tsangbaby
+Section: Tweaks
+Depends: firmware (>= 15.0), mobilesubstrate (>= 0.9.5000), preferenceloader

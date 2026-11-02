@@ -1,0 +1,384 @@
+{
+  "product": "Dynamic Stage X",
+  "package": "com.tsangbaby.dynamicstagex",
+  "version": "0.1.0-alpha1",
+  "kind": "unbuilt source candidate",
+  "excluded": [
+    "raw public-header evidence cache",
+    "caches",
+    "binaries",
+    "original user reference assets"
+  ],
+  "files": [
+    {
+      "path": ".gitignore",
+      "size": 90,
+      "sha256": "2dc39293f0438ae73888de03c043b264f71817cb3730326ceadabf919c1361e3"
+    },
+    {
+      "path": "AGENTS.md",
+      "size": 1051,
+      "sha256": "e459ccfa0154dfec7772813a7ae347d2391d755a1cb151f90a7478f11aac8cc6"
+    },
+    {
+      "path": "Docs/BUILD.md",
+      "size": 3111,
+      "sha256": "ab0f65d08657171c4c1bb53b4d059f068db2df2ee0b3acbb17aa949bf7218e33"
+    },
+    {
+      "path": "Docs/CONTRACT.md",
+      "size": 6442,
+      "sha256": "403d55a4cf258162b9ce811c038a44b91fd91ecd104e4c4f251a5b4ec018bfb8"
+    },
+    {
+      "path": "Docs/IMPLEMENTATION-LOG.md",
+      "size": 3008,
+      "sha256": "8bc2619b0ead3286c4b92e117c77af5e08bd3ac80fd676170d200ee6681740db"
+    },
+    {
+      "path": "Docs/KNOWN-LIMITATIONS.md",
+      "size": 4046,
+      "sha256": "6935874b56a87d85b2e37b222ab6b5b89c569754f898624d390caf291248f9ba"
+    },
+    {
+      "path": "Docs/SOURCE-ORIGIN.md",
+      "size": 1015,
+      "sha256": "a36ea9aec836d8af0867732a3556067a212ad935de2f3cbfcdee1a3e262e2a75"
+    },
+    {
+      "path": "Docs/SYSTEM-API.md",
+      "size": 21879,
+      "sha256": "7e75509c06ad9aea918925e8327e47ebe1d8fdf8c4388cde647602cf161596ff"
+    },
+    {
+      "path": "Docs/UI.md",
+      "size": 3120,
+      "sha256": "453a24524408fe3b30804262f61c4ebb1dcffdb4d220d82f8b9db45be3e8ec89"
+    },
+    {
+      "path": "Docs/VERIFICATION.md",
+      "size": 3489,
+      "sha256": "46b6fd962c799ef52e8e6954ffc34f45aae8ef0b5f2ba27c9fd81f82056c04b3"
+    },
+    {
+      "path": "DynamicStageX-Bridging-Header.h",
+      "size": 42,
+      "sha256": "9f86418c25501944bbaef46a80aeadfa0d128f66813a71a37c60af6f9bff36f3"
+    },
+    {
+      "path": "DynamicStageX.plist",
+      "size": 286,
+      "sha256": "5607e236ec11e8703fd426a89232ebc41a27fe806356ed4930b15e12595f528b"
+    },
+    {
+      "path": "Makefile",
+      "size": 1832,
+      "sha256": "ac3343984e3ec4f140591fe62479b1ecfdb9e9debfac133110fc38d4a95669d7"
+    },
+    {
+      "path": "Package.swift",
+      "size": 574,
+      "sha256": "bda967bb67143e0b2540da0ac681f99d3766c0674bc89993ce06617bdb1b5012"
+    },
+    {
+      "path": "Preferences/DXPreferencesController.swift",
+      "size": 5633,
+      "sha256": "a122bfb59ed556b768564aa1f96aee8a3051389ffff761e2e3ae533e7dea9387"
+    },
+    {
+      "path": "Preferences/DynamicStageXPrefs-Bridging-Header.h",
+      "size": 409,
+      "sha256": "f782d4f60d5b30457f1e0b71989ccfdb7e86642631fbdba06f8dfa47cafc04aa"
+    },
+    {
+      "path": "Preferences/Info.plist",
+      "size": 798,
+      "sha256": "c307ae69c9007e0e489ce7b0c7759c863c73c36426727533570b81e71c5b1a43"
+    },
+    {
+      "path": "README.md",
+      "size": 5113,
+      "sha256": "9deff9a79e75862407ecb74bdeee645bb6776e8213d4427f50585e0cc17264ee"
+    },
+    {
+      "path": "Reports/bridge-C-and-evidence.txt",
+      "size": 239,
+      "sha256": "adb1c7a0bf9b36278c543a79e153408ef09fbde7465d39013a66a9a91ad2270d"
+    },
+    {
+      "path": "Reports/core-source-contracts.txt",
+      "size": 880,
+      "sha256": "028c29878c711467db3fb81d49d9d590fec2ef08ea1c81742767a7d3fd9bfaae"
+    },
+    {
+      "path": "Reports/local-verification.json",
+      "size": 1098,
+      "sha256": "635f38d10d376916aaf28215b3aa75a13d028b9fff37a58f75263a3aae2638d6"
+    },
+    {
+      "path": "Reports/presentation-source-contracts.txt",
+      "size": 249,
+      "sha256": "d3e940ce1be4451cce9fdcb78faee67f9dda960b225ba64ad1f0c5fe93cb03cc"
+    },
+    {
+      "path": "Reports/source-contracts.txt",
+      "size": 871,
+      "sha256": "815489b36f34e4783d837ae2dc38cb4a5643f2aca1df40296137cee09eea0d37"
+    },
+    {
+      "path": "Reports/swift-grammar-only.txt",
+      "size": 302,
+      "sha256": "45569771f7059ccc6f86ce2669a975181be0b72382d4ee4a1060cd151003fda4"
+    },
+    {
+      "path": "Reports/swift-grammar.json",
+      "size": 137,
+      "sha256": "6b87ab05470b46c057529378ba2dd08aa95e10e90cb3c2bc2bfcd3d9379645cd"
+    },
+    {
+      "path": "Scripts/check_source.py",
+      "size": 5366,
+      "sha256": "db441c9ba075afc95767a7051e0eca70a48e650148da1e2159046833bf56c33a"
+    },
+    {
+      "path": "Scripts/check_swift_grammar.py",
+      "size": 1629,
+      "sha256": "c625fb25a5b22fa39aa69f89659e709d41c6a348c268fe5596d4d4efa90f1bae"
+    },
+    {
+      "path": "Scripts/export_source.py",
+      "size": 3372,
+      "sha256": "f4e1784f5664d8e50da333a58f5baa4ef114950bc4820fcf190dc169c5ff1d6a"
+    },
+    {
+      "path": "Scripts/verify_local.py",
+      "size": 2338,
+      "sha256": "657a756804996ea5660c5d9f44e95b978cf344871e37f6d718ec034d66145cf7"
+    },
+    {
+      "path": "Sources/Coordinator/DXCoordinator.swift",
+      "size": 28902,
+      "sha256": "a8fdc9acb94d45d133ca06832e72964bfe66a54d320f7daa2feca161437c89ce"
+    },
+    {
+      "path": "Sources/Coordinator/DXFailureNotice.swift",
+      "size": 2497,
+      "sha256": "34b3f7c5da1276c475b488e202ae072e77e8157bfeabab191eef4f18b85ec34d"
+    },
+    {
+      "path": "Sources/Coordinator/DXSceneCommandQueue.swift",
+      "size": 2820,
+      "sha256": "25e2fd83ec021152447a4700ae2cb918491c0dd48bd243b9b604538e0cf95248"
+    },
+    {
+      "path": "Sources/Core/API.md",
+      "size": 9733,
+      "sha256": "531e65795000137a4eeeeda61a65816aec14912a24026efa455556d5d76893fb"
+    },
+    {
+      "path": "Sources/Core/DXGeometry.swift",
+      "size": 3896,
+      "sha256": "d50c597cec8f0cde909e4229adf468236417ee4c7d8f2b0d6c398deece203435"
+    },
+    {
+      "path": "Sources/Core/DXKeyboardPolicy.swift",
+      "size": 3186,
+      "sha256": "0f9fb5a3d73da22909aad90ed9ce52bc8b9a411138ee708d66a24f5cfca5d98f"
+    },
+    {
+      "path": "Sources/Core/DXLayoutPolicy.swift",
+      "size": 1810,
+      "sha256": "2f36e06f2454ed4edbd898132ba6db4f3963772d9ffa3f4580335c413a648416"
+    },
+    {
+      "path": "Sources/Core/DXLifetime.swift",
+      "size": 3110,
+      "sha256": "83d06a56eb82e7fa6d0435bf7fdee4e6789eebc72e13bd3f66368f05fc49d196"
+    },
+    {
+      "path": "Sources/Core/DXStateMachine.swift",
+      "size": 5165,
+      "sha256": "737c10cdeb32fe37579d77d711b8e07cd65833cc4dbbd176a5c9225dc43d8c0a"
+    },
+    {
+      "path": "Sources/Entry/DXEntry.m",
+      "size": 2218,
+      "sha256": "723340a82e53c4dd60116a51e4243696bb46917a59c2e7d109740658dcae690e"
+    },
+    {
+      "path": "Sources/Input/DXKeyboardObserver.swift",
+      "size": 3110,
+      "sha256": "982229d3d7b1a49c6bbd9700ae0268fb074dc0eab5d11548f47478b9878d26ed"
+    },
+    {
+      "path": "Sources/Preferences/DXPreferences.swift",
+      "size": 2725,
+      "sha256": "7fe8472f1063944ef56934573631ebe21f678a3072ca28870f2433e082550ee1"
+    },
+    {
+      "path": "Sources/Presentation/DXApplicationPickerViewController.swift",
+      "size": 9723,
+      "sha256": "2a50d244bd2dcf0ca2e4ad91bf3eaeea699f20634d801ff67f296b51f5f9cac1"
+    },
+    {
+      "path": "Sources/Presentation/DXEdgeTriggerWindow.swift",
+      "size": 8900,
+      "sha256": "c64362527bf231dd05c8bb695d77527c15a9baba76c8cfb96db1c9904fed1a8a"
+    },
+    {
+      "path": "Sources/Presentation/DXOverlayWindow.swift",
+      "size": 2918,
+      "sha256": "14c7cd550083049f9382df35092b3e90c4395078d5eda05bd4d54eff5dc08300"
+    },
+    {
+      "path": "Sources/Presentation/DXPresentationGeometry.swift",
+      "size": 4256,
+      "sha256": "53d96889461bb598c4adca1e78eaa0325e1fd168d630f44e38032777421c5b85"
+    },
+    {
+      "path": "Sources/Presentation/DXRoundedPane.swift",
+      "size": 11197,
+      "sha256": "514da55c72c70d2058c40234434cc9285be28e0364ae195fd94bc1f3aef3db1a"
+    },
+    {
+      "path": "Sources/Presentation/DXStageChrome.swift",
+      "size": 2696,
+      "sha256": "88020fbca3f90adc080d5a6f9cac2f97908293963832899b1c61bfbbe7b5ef64"
+    },
+    {
+      "path": "Sources/Presentation/DXStageViewController.swift",
+      "size": 13690,
+      "sha256": "204526b2e3327e26366a1ecb8ebc19ff065378b9321245f64a4b6deb13031093"
+    },
+    {
+      "path": "Sources/System/DXABIEncoding.c",
+      "size": 2498,
+      "sha256": "6f087c7a3be11f6d8c743c6679a50fe1212e31b442e4fa0e216c1a0297d05b1d"
+    },
+    {
+      "path": "Sources/System/DXABIEncoding.h",
+      "size": 335,
+      "sha256": "05b8b89246f724909b4ca28f336c0ed2f327401edc564a75ee9dc7e4a0b13d12"
+    },
+    {
+      "path": "Sources/System/DXLeasePolicy.c",
+      "size": 238,
+      "sha256": "c487caed4854bb385e4934abe5e0fcc9910323995f7a4f4e707bb8450414bd07"
+    },
+    {
+      "path": "Sources/System/DXLeasePolicy.h",
+      "size": 375,
+      "sha256": "2f437f50b6c7c623ece94ea3b21d172c90779cbebf314b38c931608569789917"
+    },
+    {
+      "path": "Sources/System/DXRuntime.h",
+      "size": 1921,
+      "sha256": "a968439293fb8f6b259954669b2174693e24ac44c3ff1f0c55e03655cb7b37f8"
+    },
+    {
+      "path": "Sources/System/DXRuntime.m",
+      "size": 5263,
+      "sha256": "efcd9fe15fa0166b96ba432f0c08ece0b17da08f6f5d6d6c36b71336ad211aaf"
+    },
+    {
+      "path": "Sources/System/DXSystemBridge.h",
+      "size": 4386,
+      "sha256": "1179a832149a37b2b681962e659337f12ee323df66e61961523336d25f82d25e"
+    },
+    {
+      "path": "Sources/System/DXSystemBridge.m",
+      "size": 52588,
+      "sha256": "3176f18aee228dd27e8506d9bfb9e6500fe89717dabf7990b4d6d623ac5fe1f6"
+    },
+    {
+      "path": "Tests/Bridge/README.md",
+      "size": 3470,
+      "sha256": "1f950f4d9dd7c02de49a86fdd26552d2e387666b0da8f13f4698009d50404ed9"
+    },
+    {
+      "path": "Tests/Bridge/check_evidence.py",
+      "size": 2677,
+      "sha256": "d28e232bcfe454e45a08c209166b0ee0b8c6fbd000c29668c53414810deea716"
+    },
+    {
+      "path": "Tests/Bridge/document_evidence.py",
+      "size": 1593,
+      "sha256": "fdba385520b7d0f438de9200b6597a6eb6e4b5559f52528fa693eee40e3c1bdf"
+    },
+    {
+      "path": "Tests/Bridge/evidence-manifest.json",
+      "size": 50569,
+      "sha256": "0f1301569bbc01bc70fda13e1f081d87fb3f750ad15e684b14ccd02c9737b4c2"
+    },
+    {
+      "path": "Tests/Bridge/fetch_additional.py",
+      "size": 2961,
+      "sha256": "f9fade290db756d69312c088a27d1b27b3ffda889fe51a7365971ed39de85b26"
+    },
+    {
+      "path": "Tests/Bridge/fetch_evidence.py",
+      "size": 1619,
+      "sha256": "efa9b9a887a96892fbac05f07ab787d76c39f8331b97c0f83cf5a3df80355ac7"
+    },
+    {
+      "path": "Tests/Bridge/run-local.sh",
+      "size": 453,
+      "sha256": "2b31d4ec51ff567e4c5531bd453098ee3bad1bf5affae8e36b73a899b3da7327"
+    },
+    {
+      "path": "Tests/Bridge/test_policy.c",
+      "size": 2983,
+      "sha256": "6b649bd222f4dc7f77de3e6daa55ea4fcbc8a8f1caffd3ba4c2d538164db5d35"
+    },
+    {
+      "path": "Tests/Core/DXGeometryTests.swift",
+      "size": 7618,
+      "sha256": "e6b8b1212112cdb2d3f7a0bceecdfe0801d91bee563134dd4f4dc887eb8b48bf"
+    },
+    {
+      "path": "Tests/Core/DXKeyboardPolicyTests.swift",
+      "size": 6257,
+      "sha256": "066fdcfd58eb182682cb4709ff77383221adf0fd8635d0e74f8e434eac4c6c0c"
+    },
+    {
+      "path": "Tests/Core/DXLifetimeTests.swift",
+      "size": 4710,
+      "sha256": "9fe3cf7b631432b516c59d2bc76a915fc3f9ed2a631d1f97cfd177f7151dac11"
+    },
+    {
+      "path": "Tests/Core/DXStateMachineTests.swift",
+      "size": 10224,
+      "sha256": "055e61112c97da205da35454df3d37e38982263d9bd416d0d1193686f8e451cd"
+    },
+    {
+      "path": "Tests/Core/verify_source_contract.py",
+      "size": 4300,
+      "sha256": "a67ba1c2b660fb1d2e0a57496bd3d0d5ea3148137b6fff8132b6672493397a74"
+    },
+    {
+      "path": "Tests/Presentation/DXPresentationTests.swift",
+      "size": 14573,
+      "sha256": "adf0c2780c71ef78d6540bc46852b1bdaa6e89ee5f94bb00e6cb914f10bc1547"
+    },
+    {
+      "path": "Tests/Presentation/README.md",
+      "size": 3349,
+      "sha256": "bf6bc6595f2ae4e43bd6d946ec902c125a478675f7ace4c6862c75365b570588"
+    },
+    {
+      "path": "Tests/Presentation/verify_source_contract.py",
+      "size": 2771,
+      "sha256": "703d74359ed153975955843ab6fa850e3dca344993713808a2713834401e28d5"
+    },
+    {
+      "path": "control",
+      "size": 359,
+      "sha256": "3ad747e1e1fe0735be8b7e9338042bd007b9271d71c670a69a2a97eea4991fba"
+    },
+    {
+      "path": "layout/Library/PreferenceLoader/Preferences/DynamicStageX.plist",
+      "size": 449,
+      "sha256": "08aa63b2fb341ffda4c3588eff8c0a1a081fdc3242d2b7da36614c40501459a3"
+    }
+  ]
+}

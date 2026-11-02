@@ -1,0 +1,10 @@
+COMMAND: /tmp/dynamicstagex-python/bin/python Scripts/check_swift_grammar.py --output /var/minis/workspace/dynamicstagex/Reports/swift-grammar.json
+STDOUT:
+{
+  "scope": "tree-sitter Swift grammar only; not compilation or semantic validation",
+  "files": 24,
+  "errors": [],
+  "passed": true
+}
+
+STDERR:

@@ -1,0 +1,6 @@
+{
+  "scope": "tree-sitter Swift grammar only; not compilation or semantic validation",
+  "files": 24,
+  "errors": [],
+  "passed": true
+}

@@ -1,0 +1,839 @@
+[
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "Frameworks/QuartzCore.framework/CALayerHost.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/Frameworks/QuartzCore.framework/CALayerHost.h",
+    "sha256": "28587a95e5388396157326805cf5d864896d4f9e67aa9f6d3a44f08a9322d27f",
+    "local": "evidence/ios17/Frameworks/QuartzCore.framework/CALayerHost.h",
+    "bytes": 1810
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/BackBoardServices.framework/BKSHIDEventDeliveryManager.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/BackBoardServices.framework/BKSHIDEventDeliveryManager.h",
+    "sha256": "17f98b34a369de7914882919e589873e3f8c540cceba7b69849bfd2f82a11012",
+    "local": "evidence/ios17/PrivateFrameworks/BackBoardServices.framework/BKSHIDEventDeliveryManager.h",
+    "bytes": 2545
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/FrontBoard.framework/FBProcess.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/FrontBoard.framework/FBProcess.h",
+    "sha256": "467b817d11ac5bf4f1a1f2b4e294570dd1a3d0872fa472448bed0daeb46dcc04",
+    "local": "evidence/ios17/PrivateFrameworks/FrontBoard.framework/FBProcess.h",
+    "bytes": 7852
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/FrontBoard.framework/FBProcessManager.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/FrontBoard.framework/FBProcessManager.h",
+    "sha256": "4f835069d21de406af223622cc9d73191d03a8a9263de34d780c4282a0a1b966",
+    "local": "evidence/ios17/PrivateFrameworks/FrontBoard.framework/FBProcessManager.h",
+    "bytes": 3105
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/FrontBoard.framework/FBScene.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/FrontBoard.framework/FBScene.h",
+    "sha256": "dd30a45ffef9b8e6260a45888225a46836cd1287d76f71c7924ae49437aea88f",
+    "local": "evidence/ios17/PrivateFrameworks/FrontBoard.framework/FBScene.h",
+    "bytes": 9894
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/FrontBoard.framework/FBSceneLayer.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/FrontBoard.framework/FBSceneLayer.h",
+    "sha256": "c47b3cf20314f38cf15c997e6403a21983a3982dd5cfa2e138dd7bbd8bcbafed",
+    "local": "evidence/ios17/PrivateFrameworks/FrontBoard.framework/FBSceneLayer.h",
+    "bytes": 2001
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/FrontBoard.framework/FBSceneLayerManager.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/FrontBoard.framework/FBSceneLayerManager.h",
+    "sha256": "1befef7b629a6483268e97aa75ac432b969d1321475e4904743c29594ac79dbf",
+    "local": "evidence/ios17/PrivateFrameworks/FrontBoard.framework/FBSceneLayerManager.h",
+    "bytes": 1123
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/FrontBoard.framework/FBSceneManager.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/FrontBoard.framework/FBSceneManager.h",
+    "sha256": "a9e1f3b75da45ffa743bf5eeaff18d031b53729c76c93b3c272760251ebc4abc",
+    "local": "evidence/ios17/PrivateFrameworks/FrontBoard.framework/FBSceneManager.h",
+    "bytes": 2126
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/FrontBoardServices.framework/FBSMutableSceneSettings.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/FrontBoardServices.framework/FBSMutableSceneSettings.h",
+    "sha256": "f547f3b99571e05471d2f5ccfe0c15231201f406c1800a558e3330e5ae9f43ec",
+    "local": "evidence/ios17/PrivateFrameworks/FrontBoardServices.framework/FBSMutableSceneSettings.h",
+    "bytes": 17337
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/FrontBoardServices.framework/FBSScene.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/FrontBoardServices.framework/FBSScene.h",
+    "sha256": "e89c2619adc43981bf03277f7ab39a5bc3335063ed9db99eee604540aefe7661",
+    "local": "evidence/ios17/PrivateFrameworks/FrontBoardServices.framework/FBSScene.h",
+    "bytes": 6002
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/FrontBoardServices.framework/FBSSceneIdentity.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/FrontBoardServices.framework/FBSSceneIdentity.h",
+    "sha256": "195266dc368e2233b5245bc46338bcec88e0d1d05d829f265bf62752b732bd4e",
+    "local": "evidence/ios17/PrivateFrameworks/FrontBoardServices.framework/FBSSceneIdentity.h",
+    "bytes": 1328
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/FrontBoardServices.framework/FBSSceneLayer.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/FrontBoardServices.framework/FBSSceneLayer.h",
+    "sha256": "4d1678a12ff4bada5d3b7ff95f7625a061a360b6d2a3d2d869f30ab5a73aca99",
+    "local": "evidence/ios17/PrivateFrameworks/FrontBoardServices.framework/FBSSceneLayer.h",
+    "bytes": 1203
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/SpringBoard.framework/SBAppLayout.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/SpringBoard.framework/SBAppLayout.h",
+    "sha256": "853fa063517aa283f8656791d6e71303ffdd9340e4e7d01648d371f430edd6a3",
+    "local": "evidence/ios17/PrivateFrameworks/SpringBoard.framework/SBAppLayout.h",
+    "bytes": 6220
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/SpringBoard.framework/SBApplication.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/SpringBoard.framework/SBApplication.h",
+    "sha256": "3abca4014314d420c9e502188a606d5e1ebd7d191f7ccebb9086a9fe266a2d5d",
+    "local": "evidence/ios17/PrivateFrameworks/SpringBoard.framework/SBApplication.h",
+    "bytes": 21007
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/SpringBoard.framework/SBApplicationController.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/SpringBoard.framework/SBApplicationController.h",
+    "sha256": "3e8bd3a96fdaaea19f24e6b3e673c5a44470ca879cd03b3e2d3df252bb81c25b",
+    "local": "evidence/ios17/PrivateFrameworks/SpringBoard.framework/SBApplicationController.h",
+    "bytes": 3642
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/SpringBoard.framework/SBApplicationSceneEntity.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/SpringBoard.framework/SBApplicationSceneEntity.h",
+    "sha256": "b4f8e16b709f656d6b638cf61ef5985fe441b383f2aecc93f3ab9830ba702fd6",
+    "local": "evidence/ios17/PrivateFrameworks/SpringBoard.framework/SBApplicationSceneEntity.h",
+    "bytes": 1661
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/SpringBoard.framework/SBApplicationSceneHandle.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/SpringBoard.framework/SBApplicationSceneHandle.h",
+    "sha256": "03268b900f07ea8326d4d3521e7a7a5af1330f1298d08a753ba9becb11abe2d8",
+    "local": "evidence/ios17/PrivateFrameworks/SpringBoard.framework/SBApplicationSceneHandle.h",
+    "bytes": 2835
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/SpringBoard.framework/SBDeviceApplicationSceneEntity.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/SpringBoard.framework/SBDeviceApplicationSceneEntity.h",
+    "sha256": "12c60843e9ada3479e71032da24b52fc12cb2c6e5fa0a5dee171014ad5c63602",
+    "local": "evidence/ios17/PrivateFrameworks/SpringBoard.framework/SBDeviceApplicationSceneEntity.h",
+    "bytes": 2433
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/SpringBoard.framework/SBKeyboardFocusService.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/SpringBoard.framework/SBKeyboardFocusService.h",
+    "sha256": "2d0f840170f2bdbb4797cd549c4d5127f3f62289db08fb9158943cef1adad67e",
+    "local": "evidence/ios17/PrivateFrameworks/SpringBoard.framework/SBKeyboardFocusService.h",
+    "bytes": 1579
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/SpringBoard.framework/SBLockScreenManager.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/SpringBoard.framework/SBLockScreenManager.h",
+    "sha256": "0517e4ceef40c8899de7a37f5c3dec2f894798984bf0ce7a11432cf52c93c2c6",
+    "local": "evidence/ios17/PrivateFrameworks/SpringBoard.framework/SBLockScreenManager.h",
+    "bytes": 17202
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/SpringBoard.framework/SBMainDisplayRootWindowScenePresentationBinder.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/SpringBoard.framework/SBMainDisplayRootWindowScenePresentationBinder.h",
+    "sha256": "c3956df332e8d938d75609d4652585c5177cef481eaadac7fb8e7b64c55fafd7",
+    "local": "evidence/ios17/PrivateFrameworks/SpringBoard.framework/SBMainDisplayRootWindowScenePresentationBinder.h",
+    "bytes": 509
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/SpringBoard.framework/SBMainDisplaySceneManager.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/SpringBoard.framework/SBMainDisplaySceneManager.h",
+    "sha256": "1cd283516b13759767a6a526ea572c1acec101d8f074c37ff3182b71ea65618f",
+    "local": "evidence/ios17/PrivateFrameworks/SpringBoard.framework/SBMainDisplaySceneManager.h",
+    "bytes": 5267
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/SpringBoard.framework/SBMainWorkspace.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/SpringBoard.framework/SBMainWorkspace.h",
+    "sha256": "abd398eb46a4c379dc6b97ce6c960593f9fe2d323beebe9eaf0a45c253cc7d88",
+    "local": "evidence/ios17/PrivateFrameworks/SpringBoard.framework/SBMainWorkspace.h",
+    "bytes": 16246
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/SpringBoard.framework/SBRootWindowScenePresentationBinder.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/SpringBoard.framework/SBRootWindowScenePresentationBinder.h",
+    "sha256": "cf99d31505b9064611ae73d303656a5ead989344e7ff5339366c49ce57110aae",
+    "local": "evidence/ios17/PrivateFrameworks/SpringBoard.framework/SBRootWindowScenePresentationBinder.h",
+    "bytes": 520
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/SpringBoard.framework/SBSceneIdentityProvider.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/SpringBoard.framework/SBSceneIdentityProvider.h",
+    "sha256": "5105d036b80a91a4e586eefd706bacccd79884093624c2b1a425198ace082466",
+    "local": "evidence/ios17/PrivateFrameworks/SpringBoard.framework/SBSceneIdentityProvider.h",
+    "bytes": 1466
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/SpringBoard.framework/SBSceneManager.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/SpringBoard.framework/SBSceneManager.h",
+    "sha256": "b87a74ab92cf4781182a6a7f66641ad7894a898e7d17bca40bcf2245acb08222",
+    "local": "evidence/ios17/PrivateFrameworks/SpringBoard.framework/SBSceneManager.h",
+    "bytes": 8157
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/SpringBoard.framework/SBSceneManagerCoordinator.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/SpringBoard.framework/SBSceneManagerCoordinator.h",
+    "sha256": "cd7e66553953f8475a05f03fbe6d2aeda7caf73590ec9305c8473cb1b9b3c731",
+    "local": "evidence/ios17/PrivateFrameworks/SpringBoard.framework/SBSceneManagerCoordinator.h",
+    "bytes": 2841
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/SpringBoard.framework/SBTraitsInputsKeyboardFocusValidator.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/SpringBoard.framework/SBTraitsInputsKeyboardFocusValidator.h",
+    "sha256": "a3a90f1665e602b536f3d4e1f8c04d8753f196ac6d11aa61ad550ec87b3cc335",
+    "local": "evidence/ios17/PrivateFrameworks/SpringBoard.framework/SBTraitsInputsKeyboardFocusValidator.h",
+    "bytes": 353
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/SpringBoard.framework/SBWindowScene.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/SpringBoard.framework/SBWindowScene.h",
+    "sha256": "a683da8928852e31238495f08de4e84c84d9bef1cb9fb1f1036e1d8bfccc359f",
+    "local": "evidence/ios17/PrivateFrameworks/SpringBoard.framework/SBWindowScene.h",
+    "bytes": 5334
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/SpringBoard.framework/SBWindowSceneManager.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/SpringBoard.framework/SBWindowSceneManager.h",
+    "sha256": "d19da51ab3658fe6c341bd01ae013013474ca25146ebef95e1d85a31109e3e13",
+    "local": "evidence/ios17/PrivateFrameworks/SpringBoard.framework/SBWindowSceneManager.h",
+    "bytes": 1924
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/SpringBoard.framework/SBWorkspace.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/SpringBoard.framework/SBWorkspace.h",
+    "sha256": "3eaf45bb265d4f4590f20199750625115b2fb1f667a5c8a2889c83d3c06b2658",
+    "local": "evidence/ios17/PrivateFrameworks/SpringBoard.framework/SBWorkspace.h",
+    "bytes": 1876
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/SpringBoard.framework/SBWorkspaceKeyboardFocusController.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/SpringBoard.framework/SBWorkspaceKeyboardFocusController.h",
+    "sha256": "843e2bf045634bd88f088b65c43c5b275a32dc9510ad617db28df8a5a4ff9c85",
+    "local": "evidence/ios17/PrivateFrameworks/SpringBoard.framework/SBWorkspaceKeyboardFocusController.h",
+    "bytes": 6604
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/SpringBoard.framework/SpringBoard.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/SpringBoard.framework/SpringBoard.h",
+    "sha256": "e1997c70099f1e758115362fef2a13800f6b4f98759c9ab395bac77161301020",
+    "local": "evidence/ios17/PrivateFrameworks/SpringBoard.framework/SpringBoard.h",
+    "bytes": 53994
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/SpringBoard.framework/_SBActiveDisplayKeyboardFocusTracker.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/SpringBoard.framework/_SBActiveDisplayKeyboardFocusTracker.h",
+    "sha256": "1a76414fa493ec3e1466ab72da5a904382561d809a01a9a7d6c2fa66ba2aacfa",
+    "local": "evidence/ios17/PrivateFrameworks/SpringBoard.framework/_SBActiveDisplayKeyboardFocusTracker.h",
+    "bytes": 379
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/SpringBoard.framework/_SBKeyboardFocusPolicy.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/SpringBoard.framework/_SBKeyboardFocusPolicy.h",
+    "sha256": "5960e9cb872748b3ef519929ac6a3fcf36bb947e98a5c2ac8cfe2165c6282f4d",
+    "local": "evidence/ios17/PrivateFrameworks/SpringBoard.framework/_SBKeyboardFocusPolicy.h",
+    "bytes": 1802
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/SpringBoard.framework/_SBKeyboardFocusRedirection.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/SpringBoard.framework/_SBKeyboardFocusRedirection.h",
+    "sha256": "564fc5e7b3d2a5b4f9b5422042ac1425478dd0d0f74eba36d364fdf710896b85",
+    "local": "evidence/ios17/PrivateFrameworks/SpringBoard.framework/_SBKeyboardFocusRedirection.h",
+    "bytes": 278
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/SpringBoard.framework/_SBMutableKeyboardFocusPolicy.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/SpringBoard.framework/_SBMutableKeyboardFocusPolicy.h",
+    "sha256": "bd2d082efa51e715a461c4faa1f9a80973cf30c04fdbe99e26bdf973d1075e9f",
+    "local": "evidence/ios17/PrivateFrameworks/SpringBoard.framework/_SBMutableKeyboardFocusPolicy.h",
+    "bytes": 841
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/UIKitCore.framework/UIApplicationSceneSettings.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/UIKitCore.framework/UIApplicationSceneSettings.h",
+    "sha256": "edfc9cf2aa803d813144e67a3e675cba49d40ba0c41692feeebee8a8886308d3",
+    "local": "evidence/ios17/PrivateFrameworks/UIKitCore.framework/UIApplicationSceneSettings.h",
+    "bytes": 6243
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/UIKitCore.framework/UIKeyboardScenePresentationModeManager.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/UIKitCore.framework/UIKeyboardScenePresentationModeManager.h",
+    "sha256": "8f40da6f8f0aa14577717cf658065dc6611137130d9308aa0ec9cf0c17284d07",
+    "local": "evidence/ios17/PrivateFrameworks/UIKitCore.framework/UIKeyboardScenePresentationModeManager.h",
+    "bytes": 1146
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/UIKitCore.framework/UIMutableApplicationSceneSettings.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/UIKitCore.framework/UIMutableApplicationSceneSettings.h",
+    "sha256": "9f46f794e8c0db925243873dec54dbffb925775fac995c35201bfb19b253af91",
+    "local": "evidence/ios17/PrivateFrameworks/UIKitCore.framework/UIMutableApplicationSceneSettings.h",
+    "bytes": 8279
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/UIKitCore.framework/UIMutableScenePresentationContext.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/UIKitCore.framework/UIMutableScenePresentationContext.h",
+    "sha256": "d9bf45f910394a040fd10b640473f275bd5da95d56ad3d6225e8eb8a041f8b90",
+    "local": "evidence/ios17/PrivateFrameworks/UIKitCore.framework/UIMutableScenePresentationContext.h",
+    "bytes": 2646
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/UIKitCore.framework/UIMutableTransformer.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/UIKitCore.framework/UIMutableTransformer.h",
+    "sha256": "f59066acc544ff5f0ec0729bda8f2d379316f5501e3268bdeddf8eb73fba5cbb",
+    "local": "evidence/ios17/PrivateFrameworks/UIKitCore.framework/UIMutableTransformer.h",
+    "bytes": 610
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/UIKitCore.framework/UIRootWindowScenePresentationBinder.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/UIKitCore.framework/UIRootWindowScenePresentationBinder.h",
+    "sha256": "56960e4465026ff9ab3494b8816e943a3a9a000a21c6f8070d69426ebd0b294e",
+    "local": "evidence/ios17/PrivateFrameworks/UIKitCore.framework/UIRootWindowScenePresentationBinder.h",
+    "bytes": 877
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/UIKitCore.framework/UIScenePresentationBinder.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/UIKitCore.framework/UIScenePresentationBinder.h",
+    "sha256": "d4f55e887bbd5d2b535050ab691d9bf989f6d3d1aaf41bf2316f52b5384b3cd7",
+    "local": "evidence/ios17/PrivateFrameworks/UIKitCore.framework/UIScenePresentationBinder.h",
+    "bytes": 2419
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/UIKitCore.framework/UIScenePresentationContext.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/UIKitCore.framework/UIScenePresentationContext.h",
+    "sha256": "34723c268f2492d0d6df645c4dc724e4fde62500964145323fe574e45ba6992a",
+    "local": "evidence/ios17/PrivateFrameworks/UIKitCore.framework/UIScenePresentationContext.h",
+    "bytes": 3034
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/UIKitCore.framework/UIScenePresentationManager.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/UIKitCore.framework/UIScenePresentationManager.h",
+    "sha256": "59245aedd91f0106c3f0ffa9ee9cfdd62c3c749e7eb0ed349567f025fbec432c",
+    "local": "evidence/ios17/PrivateFrameworks/UIKitCore.framework/UIScenePresentationManager.h",
+    "bytes": 2302
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/UIKitCore.framework/UISystemShellApplication.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/UIKitCore.framework/UISystemShellApplication.h",
+    "sha256": "91cbeb4615eb659ffa625f662d0bd2e8fe21205c73034a4a903c3b5452e2d96b",
+    "local": "evidence/ios17/PrivateFrameworks/UIKitCore.framework/UISystemShellApplication.h",
+    "bytes": 1008
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/UIKitCore.framework/UITransform.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/UIKitCore.framework/UITransform.h",
+    "sha256": "dc341a23d0537bd5ac61995b2ba9cc24fda15fb0d38cc1d91de2556c108dd40d",
+    "local": "evidence/ios17/PrivateFrameworks/UIKitCore.framework/UITransform.h",
+    "bytes": 1485
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/UIKitCore.framework/UITransformer.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/UIKitCore.framework/UITransformer.h",
+    "sha256": "67eee9d1cd87d7ebc1bd3c20666e6d1ab8d85a62ce54581495fe7f0d525f84e0",
+    "local": "evidence/ios17/PrivateFrameworks/UIKitCore.framework/UITransformer.h",
+    "bytes": 668
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/UIKitCore.framework/UIWindow.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/UIKitCore.framework/UIWindow.h",
+    "sha256": "c35e203681b119bc736e909d617e6065319a9e6e7124bcf27705a03e1084e692",
+    "local": "evidence/ios17/PrivateFrameworks/UIKitCore.framework/UIWindow.h",
+    "bytes": 53880
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/UIKitCore.framework/_UIContextLayerHostView.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/UIKitCore.framework/_UIContextLayerHostView.h",
+    "sha256": "61b026d578dbe0ac55b13d7ffa577401b8a0876f734f5fbf7cddfdf4e6dcd78e",
+    "local": "evidence/ios17/PrivateFrameworks/UIKitCore.framework/_UIContextLayerHostView.h",
+    "bytes": 673
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/UIKitCore.framework/_UISceneLayerHostContainerView.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/UIKitCore.framework/_UISceneLayerHostContainerView.h",
+    "sha256": "3e8f312ccf02b2310609a09b3a45a3ababf51e89b8df3f68703461043177287b",
+    "local": "evidence/ios17/PrivateFrameworks/UIKitCore.framework/_UISceneLayerHostContainerView.h",
+    "bytes": 3430
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/UIKitCore.framework/_UISceneLayerHostView.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/UIKitCore.framework/_UISceneLayerHostView.h",
+    "sha256": "de167c638a6c6d12d8cc1ae19c32d1694a06dbc966dbef34fa119a97b8a05ef6",
+    "local": "evidence/ios17/PrivateFrameworks/UIKitCore.framework/_UISceneLayerHostView.h",
+    "bytes": 1409
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/UIKitCore.framework/_UIScenePresentationView.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/UIKitCore.framework/_UIScenePresentationView.h",
+    "sha256": "6c1cbf334142c09f60684ec77f6ca170831f365a389c71d2f0321c540192541f",
+    "local": "evidence/ios17/PrivateFrameworks/UIKitCore.framework/_UIScenePresentationView.h",
+    "bytes": 2243
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "PrivateFrameworks/UIKitCore.framework/_UIScenePresenter.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/PrivateFrameworks/UIKitCore.framework/_UIScenePresenter.h",
+    "sha256": "0daf6282de824ac680291014596d9a15ff5fccb8c7038ba0c478a89b964e242d",
+    "local": "evidence/ios17/PrivateFrameworks/UIKitCore.framework/_UIScenePresenter.h",
+    "bytes": 2348
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "protocols/FBProcessManagerObserver.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/protocols/FBProcessManagerObserver.h",
+    "sha256": "7f32f61ba9d49551c4d3dd8895574ffb6c09aca31cead1bbb047ad531484776d",
+    "local": "evidence/ios17/protocols/FBProcessManagerObserver.h",
+    "bytes": 230
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "protocols/FBSceneManagerObserver.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/protocols/FBSceneManagerObserver.h",
+    "sha256": "6692451e97245bcfa2339ead741f855f3f977d7238f5a5483c2dcef0eb3852c3",
+    "local": "evidence/ios17/protocols/FBSceneManagerObserver.h",
+    "bytes": 1512
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "protocols/FBSceneObserver.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/protocols/FBSceneObserver.h",
+    "sha256": "66986bd46aafc88c8a3bd691e2b92f1b3de31c5273e7b0801a3f0a1718c9ff79",
+    "local": "evidence/ios17/protocols/FBSceneObserver.h",
+    "bytes": 887
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "protocols/SBWorkspaceKeyboardFocusControllerObserver.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/protocols/SBWorkspaceKeyboardFocusControllerObserver.h",
+    "sha256": "724193b15888bc45a75fa674627e093f7b2158057cb58bf11eef1ae187ddd10e",
+    "local": "evidence/ios17/protocols/SBWorkspaceKeyboardFocusControllerObserver.h",
+    "bytes": 373
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "protocols/UIScenePresentation.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/protocols/UIScenePresentation.h",
+    "sha256": "c56ff09580630259511c22f0e87754094a7c57fb09a1df018e08dab71db9bdfc",
+    "local": "evidence/ios17/protocols/UIScenePresentation.h",
+    "bytes": 165
+  },
+  {
+    "repository": "MTACS/iOS-17-Runtime-Headers",
+    "revision": "d1d960dfaa4107765dd7fcf891e4967c0930d5fd",
+    "path": "protocols/UIScenePresenter.h",
+    "url": "https://raw.githubusercontent.com/MTACS/iOS-17-Runtime-Headers/d1d960dfaa4107765dd7fcf891e4967c0930d5fd/protocols/UIScenePresenter.h",
+    "sha256": "373465e5ed7a8bd8c3c7526706a0acf1876dc2ec98b6277691e2e92d3126cdd7",
+    "local": "evidence/ios17/protocols/UIScenePresenter.h",
+    "bytes": 826
+  },
+  {
+    "repository": "nst/iOS-Runtime-Headers",
+    "revision": "fbb634c78269b0169efdead80955ba64eaaa2f21",
+    "path": "PrivateFrameworks/FrontBoard.framework/FBProcess.h",
+    "url": "https://raw.githubusercontent.com/nst/iOS-Runtime-Headers/fbb634c78269b0169efdead80955ba64eaaa2f21/PrivateFrameworks/FrontBoard.framework/FBProcess.h",
+    "sha256": "81794d2c6bb8141fc6431e4237db5bc148fa6e90b14d3de0ab6085651355ab07",
+    "local": "evidence/nst/PrivateFrameworks/FrontBoard.framework/FBProcess.h",
+    "bytes": 5352
+  },
+  {
+    "repository": "nst/iOS-Runtime-Headers",
+    "revision": "fbb634c78269b0169efdead80955ba64eaaa2f21",
+    "path": "PrivateFrameworks/FrontBoard.framework/FBProcessManager.h",
+    "url": "https://raw.githubusercontent.com/nst/iOS-Runtime-Headers/fbb634c78269b0169efdead80955ba64eaaa2f21/PrivateFrameworks/FrontBoard.framework/FBProcessManager.h",
+    "sha256": "4ad1356ca6c944b4731b466b2de0c18583f96ceea00b04b95b171b27d64431b5",
+    "local": "evidence/nst/PrivateFrameworks/FrontBoard.framework/FBProcessManager.h",
+    "bytes": 2910
+  },
+  {
+    "repository": "nst/iOS-Runtime-Headers",
+    "revision": "fbb634c78269b0169efdead80955ba64eaaa2f21",
+    "path": "PrivateFrameworks/FrontBoard.framework/FBScene.h",
+    "url": "https://raw.githubusercontent.com/nst/iOS-Runtime-Headers/fbb634c78269b0169efdead80955ba64eaaa2f21/PrivateFrameworks/FrontBoard.framework/FBScene.h",
+    "sha256": "3f50a99f19a97e974b81b2d705e4570f44ce4caf5de16eef99dc24f4f9f52df5",
+    "local": "evidence/nst/PrivateFrameworks/FrontBoard.framework/FBScene.h",
+    "bytes": 5350
+  },
+  {
+    "repository": "nst/iOS-Runtime-Headers",
+    "revision": "fbb634c78269b0169efdead80955ba64eaaa2f21",
+    "path": "PrivateFrameworks/FrontBoard.framework/FBSceneHostManager.h",
+    "url": "https://raw.githubusercontent.com/nst/iOS-Runtime-Headers/fbb634c78269b0169efdead80955ba64eaaa2f21/PrivateFrameworks/FrontBoard.framework/FBSceneHostManager.h",
+    "sha256": "195162c7d6edc31ce2d44f41f4d6619af058743f46ad028ee5ea5bf0c88b9909",
+    "local": "evidence/nst/PrivateFrameworks/FrontBoard.framework/FBSceneHostManager.h",
+    "bytes": 6712
+  },
+  {
+    "repository": "nst/iOS-Runtime-Headers",
+    "revision": "fbb634c78269b0169efdead80955ba64eaaa2f21",
+    "path": "PrivateFrameworks/FrontBoard.framework/FBSceneManager.h",
+    "url": "https://raw.githubusercontent.com/nst/iOS-Runtime-Headers/fbb634c78269b0169efdead80955ba64eaaa2f21/PrivateFrameworks/FrontBoard.framework/FBSceneManager.h",
+    "sha256": "ff115e9d01144c526ddf48d9330709521b73bb70a042f661602f42eb3c0df166",
+    "local": "evidence/nst/PrivateFrameworks/FrontBoard.framework/FBSceneManager.h",
+    "bytes": 4987
+  },
+  {
+    "repository": "nst/iOS-Runtime-Headers",
+    "revision": "fbb634c78269b0169efdead80955ba64eaaa2f21",
+    "path": "PrivateFrameworks/FrontBoardServices.framework/FBSMutableSceneSettings.h",
+    "url": "https://raw.githubusercontent.com/nst/iOS-Runtime-Headers/fbb634c78269b0169efdead80955ba64eaaa2f21/PrivateFrameworks/FrontBoardServices.framework/FBSMutableSceneSettings.h",
+    "sha256": "aee3557a5cc431cc63fd6549371618e94e02799d6bece962f61ccc7cccc67d02",
+    "local": "evidence/nst/PrivateFrameworks/FrontBoardServices.framework/FBSMutableSceneSettings.h",
+    "bytes": 1134
+  },
+  {
+    "repository": "nst/iOS-Runtime-Headers",
+    "revision": "fbb634c78269b0169efdead80955ba64eaaa2f21",
+    "path": "PrivateFrameworks/FrontBoardServices.framework/FBSScene.h",
+    "url": "https://raw.githubusercontent.com/nst/iOS-Runtime-Headers/fbb634c78269b0169efdead80955ba64eaaa2f21/PrivateFrameworks/FrontBoardServices.framework/FBSScene.h",
+    "sha256": "6992656e38f5c53a1e886d85493006a36566fe68444e370adb9810d9d0604d7a",
+    "local": "evidence/nst/PrivateFrameworks/FrontBoardServices.framework/FBSScene.h",
+    "bytes": 2799
+  },
+  {
+    "repository": "nst/iOS-Runtime-Headers",
+    "revision": "fbb634c78269b0169efdead80955ba64eaaa2f21",
+    "path": "PrivateFrameworks/FrontBoardServices.framework/FBSSceneClientSettings.h",
+    "url": "https://raw.githubusercontent.com/nst/iOS-Runtime-Headers/fbb634c78269b0169efdead80955ba64eaaa2f21/PrivateFrameworks/FrontBoardServices.framework/FBSSceneClientSettings.h",
+    "sha256": "2851a64bef08e6c3e41ee1350189142e9a18332478e71e78d9e992512a48eb6d",
+    "local": "evidence/nst/PrivateFrameworks/FrontBoardServices.framework/FBSSceneClientSettings.h",
+    "bytes": 1819
+  },
+  {
+    "repository": "nst/iOS-Runtime-Headers",
+    "revision": "fbb634c78269b0169efdead80955ba64eaaa2f21",
+    "path": "PrivateFrameworks/FrontBoardServices.framework/FBSSceneIdentity.h",
+    "url": "https://raw.githubusercontent.com/nst/iOS-Runtime-Headers/fbb634c78269b0169efdead80955ba64eaaa2f21/PrivateFrameworks/FrontBoardServices.framework/FBSSceneIdentity.h",
+    "sha256": "c71d81eadbce54613211b9793122d5585cb6723d592ed644ad9ca1ccc3ee7591",
+    "local": "evidence/nst/PrivateFrameworks/FrontBoardServices.framework/FBSSceneIdentity.h",
+    "bytes": 1194
+  },
+  {
+    "repository": "nst/iOS-Runtime-Headers",
+    "revision": "fbb634c78269b0169efdead80955ba64eaaa2f21",
+    "path": "PrivateFrameworks/FrontBoardServices.framework/FBSSceneLayer.h",
+    "url": "https://raw.githubusercontent.com/nst/iOS-Runtime-Headers/fbb634c78269b0169efdead80955ba64eaaa2f21/PrivateFrameworks/FrontBoardServices.framework/FBSSceneLayer.h",
+    "sha256": "7f19fe67c1ab593a813e1ccf661c4c143db0c7ca42a6be88925159a3a04e2168",
+    "local": "evidence/nst/PrivateFrameworks/FrontBoardServices.framework/FBSSceneLayer.h",
+    "bytes": 1502
+  },
+  {
+    "repository": "nst/iOS-Runtime-Headers",
+    "revision": "fbb634c78269b0169efdead80955ba64eaaa2f21",
+    "path": "PrivateFrameworks/FrontBoardServices.framework/FBSSceneSettings.h",
+    "url": "https://raw.githubusercontent.com/nst/iOS-Runtime-Headers/fbb634c78269b0169efdead80955ba64eaaa2f21/PrivateFrameworks/FrontBoardServices.framework/FBSSceneSettings.h",
+    "sha256": "ae350d6ebb800e43334afa9ade3d2f64c80089c614681cc0d9c66e277ca2d8b0",
+    "local": "evidence/nst/PrivateFrameworks/FrontBoardServices.framework/FBSSceneSettings.h",
+    "bytes": 3315
+  },
+  {
+    "repository": "nst/iOS-Runtime-Headers",
+    "revision": "fbb634c78269b0169efdead80955ba64eaaa2f21",
+    "path": "PrivateFrameworks/UIKitCore.framework/UIApplicationSceneSettings.h",
+    "url": "https://raw.githubusercontent.com/nst/iOS-Runtime-Headers/fbb634c78269b0169efdead80955ba64eaaa2f21/PrivateFrameworks/UIKitCore.framework/UIApplicationSceneSettings.h",
+    "sha256": "99ce3774e55fb7add50072ea338a0dc4b3f4959a7aca25e28e565d978d7dce69",
+    "local": "evidence/nst/PrivateFrameworks/UIKitCore.framework/UIApplicationSceneSettings.h",
+    "bytes": 3883
+  },
+  {
+    "repository": "nst/iOS-Runtime-Headers",
+    "revision": "fbb634c78269b0169efdead80955ba64eaaa2f21",
+    "path": "PrivateFrameworks/UIKitCore.framework/UIMutableApplicationSceneSettings.h",
+    "url": "https://raw.githubusercontent.com/nst/iOS-Runtime-Headers/fbb634c78269b0169efdead80955ba64eaaa2f21/PrivateFrameworks/UIKitCore.framework/UIMutableApplicationSceneSettings.h",
+    "sha256": "944a7c99ede49a8fbf809ddeb619484d387d45eab5a6acd04e07a38f600af165",
+    "local": "evidence/nst/PrivateFrameworks/UIKitCore.framework/UIMutableApplicationSceneSettings.h",
+    "bytes": 4999
+  },
+  {
+    "repository": "nst/iOS-Runtime-Headers",
+    "revision": "fbb634c78269b0169efdead80955ba64eaaa2f21",
+    "path": "PrivateFrameworks/UIKitCore.framework/UIWindow.h",
+    "url": "https://raw.githubusercontent.com/nst/iOS-Runtime-Headers/fbb634c78269b0169efdead80955ba64eaaa2f21/PrivateFrameworks/UIKitCore.framework/UIWindow.h",
+    "sha256": "2002a8215c6aa46731f6d4f50169089ec52e70591b659ba36ad2bf59811fa9fc",
+    "local": "evidence/nst/PrivateFrameworks/UIKitCore.framework/UIWindow.h",
+    "bytes": 39087
+  },
+  {
+    "repository": "nst/iOS-Runtime-Headers",
+    "revision": "fbb634c78269b0169efdead80955ba64eaaa2f21",
+    "path": "protocols/FBProcessManagerObserver.h",
+    "url": "https://raw.githubusercontent.com/nst/iOS-Runtime-Headers/fbb634c78269b0169efdead80955ba64eaaa2f21/protocols/FBProcessManagerObserver.h",
+    "sha256": "64797b408c53cf326d6ef5ef50cfb125a0c1ea2e5d5cb0ed26b9a42b44bc7623",
+    "local": "evidence/nst/protocols/FBProcessManagerObserver.h",
+    "bytes": 266
+  },
+  {
+    "repository": "nst/iOS-Runtime-Headers",
+    "revision": "fbb634c78269b0169efdead80955ba64eaaa2f21",
+    "path": "protocols/FBSceneManagerObserver.h",
+    "url": "https://raw.githubusercontent.com/nst/iOS-Runtime-Headers/fbb634c78269b0169efdead80955ba64eaaa2f21/protocols/FBSceneManagerObserver.h",
+    "sha256": "82e174e644bf5514910b527f4d30b4d83807dd0b852a082edc290f5db896da2b",
+    "local": "evidence/nst/protocols/FBSceneManagerObserver.h",
+    "bytes": 1398
+  },
+  {
+    "repository": "theos/headers",
+    "revision": "13c1f17176d7efe6871551cd69a75b71ac4eeaf1",
+    "path": "FrontBoard/FBProcess.h",
+    "url": "https://raw.githubusercontent.com/theos/headers/13c1f17176d7efe6871551cd69a75b71ac4eeaf1/FrontBoard/FBProcess.h",
+    "sha256": "4de095a7156508713ba37bcf345ad77fcfb1f06bcd35b09f8b13e453cf87696d",
+    "local": "evidence/theos/FrontBoard/FBProcess.h",
+    "bytes": 188
+  },
+  {
+    "repository": "theos/headers",
+    "revision": "13c1f17176d7efe6871551cd69a75b71ac4eeaf1",
+    "path": "FrontBoard/FBProcessManager.h",
+    "url": "https://raw.githubusercontent.com/theos/headers/13c1f17176d7efe6871551cd69a75b71ac4eeaf1/FrontBoard/FBProcessManager.h",
+    "sha256": "6fb53eebc038b0b1e8cbbf33c5004ce3871aa8d947fa28744e7f8c70c6781473",
+    "local": "evidence/theos/FrontBoard/FBProcessManager.h",
+    "bytes": 499
+  },
+  {
+    "repository": "theos/headers",
+    "revision": "13c1f17176d7efe6871551cd69a75b71ac4eeaf1",
+    "path": "FrontBoard/FBSMutableSceneSettings.h",
+    "url": "https://raw.githubusercontent.com/theos/headers/13c1f17176d7efe6871551cd69a75b71ac4eeaf1/FrontBoard/FBSMutableSceneSettings.h",
+    "sha256": "b38cebc33c6c669618a6448e85df981837f7fc838cefc5e5a04e9d4364f67b20",
+    "local": "evidence/theos/FrontBoard/FBSMutableSceneSettings.h",
+    "bytes": 146
+  },
+  {
+    "repository": "theos/headers",
+    "revision": "13c1f17176d7efe6871551cd69a75b71ac4eeaf1",
+    "path": "FrontBoard/FBSSceneSettings.h",
+    "url": "https://raw.githubusercontent.com/theos/headers/13c1f17176d7efe6871551cd69a75b71ac4eeaf1/FrontBoard/FBSSceneSettings.h",
+    "sha256": "4549c2824af35b72c6dc34652f2bec8de492ed1f477ef599ce429b40ddcc36b9",
+    "local": "evidence/theos/FrontBoard/FBSSceneSettings.h",
+    "bytes": 314
+  },
+  {
+    "repository": "theos/headers",
+    "revision": "13c1f17176d7efe6871551cd69a75b71ac4eeaf1",
+    "path": "FrontBoard/FBScene.h",
+    "url": "https://raw.githubusercontent.com/theos/headers/13c1f17176d7efe6871551cd69a75b71ac4eeaf1/FrontBoard/FBScene.h",
+    "sha256": "aae2abf98168758c49968108a37403b5fcf022bf7b4db723493acc13305d3e24",
+    "local": "evidence/theos/FrontBoard/FBScene.h",
+    "bytes": 908
+  },
+  {
+    "repository": "theos/headers",
+    "revision": "13c1f17176d7efe6871551cd69a75b71ac4eeaf1",
+    "path": "FrontBoard/FBSceneHostManager.h",
+    "url": "https://raw.githubusercontent.com/theos/headers/13c1f17176d7efe6871551cd69a75b71ac4eeaf1/FrontBoard/FBSceneHostManager.h",
+    "sha256": "5b2b2377b1c08924a6eb05e37c9021e8bc74b0dd60c5a43e5dd16324dfbd942b",
+    "local": "evidence/theos/FrontBoard/FBSceneHostManager.h",
+    "bytes": 459
+  },
+  {
+    "repository": "theos/headers",
+    "revision": "13c1f17176d7efe6871551cd69a75b71ac4eeaf1",
+    "path": "FrontBoard/FBSceneManager.h",
+    "url": "https://raw.githubusercontent.com/theos/headers/13c1f17176d7efe6871551cd69a75b71ac4eeaf1/FrontBoard/FBSceneManager.h",
+    "sha256": "7f68b1eab52394ad609382d6de5e08b20331ed68834f87684241f30ee3fe63fa",
+    "local": "evidence/theos/FrontBoard/FBSceneManager.h",
+    "bytes": 186
+  },
+  {
+    "repository": "theos/headers",
+    "revision": "13c1f17176d7efe6871551cd69a75b71ac4eeaf1",
+    "path": "FrontBoardServices/FBSMutableSceneSettings.h",
+    "url": "https://raw.githubusercontent.com/theos/headers/13c1f17176d7efe6871551cd69a75b71ac4eeaf1/FrontBoardServices/FBSMutableSceneSettings.h",
+    "sha256": "abf475f4085930734c2a6414e4610c7227ace136dfb7fa1a9738a32cb2798958",
+    "local": "evidence/theos/FrontBoardServices/FBSMutableSceneSettings.h",
+    "bytes": 163
+  },
+  {
+    "repository": "theos/headers",
+    "revision": "13c1f17176d7efe6871551cd69a75b71ac4eeaf1",
+    "path": "FrontBoardServices/FBSSceneSettings.h",
+    "url": "https://raw.githubusercontent.com/theos/headers/13c1f17176d7efe6871551cd69a75b71ac4eeaf1/FrontBoardServices/FBSSceneSettings.h",
+    "sha256": "a4e7edb72d8e9b90924cb3ffed3679e31c546905f8ee9518282c18a313754678",
+    "local": "evidence/theos/FrontBoardServices/FBSSceneSettings.h",
+    "bytes": 344
+  },
+  {
+    "repository": "theos/headers",
+    "revision": "13c1f17176d7efe6871551cd69a75b71ac4eeaf1",
+    "path": "SpringBoard/SBApplication.h",
+    "url": "https://raw.githubusercontent.com/theos/headers/13c1f17176d7efe6871551cd69a75b71ac4eeaf1/SpringBoard/SBApplication.h",
+    "sha256": "85ab7791ed55a77658e269653079404c45ab9cf5b153cbba15dfc4b1fb70225c",
+    "local": "evidence/theos/SpringBoard/SBApplication.h",
+    "bytes": 1701
+  },
+  {
+    "repository": "theos/headers",
+    "revision": "13c1f17176d7efe6871551cd69a75b71ac4eeaf1",
+    "path": "SpringBoard/SBApplicationController.h",
+    "url": "https://raw.githubusercontent.com/theos/headers/13c1f17176d7efe6871551cd69a75b71ac4eeaf1/SpringBoard/SBApplicationController.h",
+    "sha256": "52b54cd68fd50834a86903e2f8831a6a938ba0fb6b3d5322acd713d40c9a5ca1",
+    "local": "evidence/theos/SpringBoard/SBApplicationController.h",
+    "bytes": 694
+  },
+  {
+    "repository": "theos/headers",
+    "revision": "13c1f17176d7efe6871551cd69a75b71ac4eeaf1",
+    "path": "SpringBoard/SBApplicationSceneEntity.h",
+    "url": "https://raw.githubusercontent.com/theos/headers/13c1f17176d7efe6871551cd69a75b71ac4eeaf1/SpringBoard/SBApplicationSceneEntity.h",
+    "sha256": "9a3ad1756fdd72cae2b534f1671cc50ca31fefc9a0063b2e01770d6d091a37af",
+    "local": "evidence/theos/SpringBoard/SBApplicationSceneEntity.h",
+    "bytes": 177
+  },
+  {
+    "repository": "theos/headers",
+    "revision": "13c1f17176d7efe6871551cd69a75b71ac4eeaf1",
+    "path": "SpringBoard/SBDeviceApplicationSceneEntity.h",
+    "url": "https://raw.githubusercontent.com/theos/headers/13c1f17176d7efe6871551cd69a75b71ac4eeaf1/SpringBoard/SBDeviceApplicationSceneEntity.h",
+    "sha256": "45bc3c730955c0474bc882c5219ff12e78afc1e6b5659bdc68e5668849d249b4",
+    "local": "evidence/theos/SpringBoard/SBDeviceApplicationSceneEntity.h",
+    "bytes": 216
+  },
+  {
+    "repository": "theos/headers",
+    "revision": "13c1f17176d7efe6871551cd69a75b71ac4eeaf1",
+    "path": "SpringBoard/SBLockScreenManager.h",
+    "url": "https://raw.githubusercontent.com/theos/headers/13c1f17176d7efe6871551cd69a75b71ac4eeaf1/SpringBoard/SBLockScreenManager.h",
+    "sha256": "243ad3536248546a59be82bdfaa976aa7dd636904af3b59e10dd74ffec7bfae4",
+    "local": "evidence/theos/SpringBoard/SBLockScreenManager.h",
+    "bytes": 796
+  },
+  {
+    "repository": "theos/headers",
+    "revision": "13c1f17176d7efe6871551cd69a75b71ac4eeaf1",
+    "path": "SpringBoard/SBWorkspace.h",
+    "url": "https://raw.githubusercontent.com/theos/headers/13c1f17176d7efe6871551cd69a75b71ac4eeaf1/SpringBoard/SBWorkspace.h",
+    "sha256": "ceb5421a928400749e6457eecc21f591ef35386ae4cd2d26d6c602f278a37d78",
+    "local": "evidence/theos/SpringBoard/SBWorkspace.h",
+    "bytes": 303
+  },
+  {
+    "repository": "theos/headers",
+    "revision": "13c1f17176d7efe6871551cd69a75b71ac4eeaf1",
+    "path": "SpringBoard/SpringBoard.h",
+    "url": "https://raw.githubusercontent.com/theos/headers/13c1f17176d7efe6871551cd69a75b71ac4eeaf1/SpringBoard/SpringBoard.h",
+    "sha256": "49391e503e96cd597e1adb3e31d8f4c12b7d2de66a9338c01e6366747ed4256d",
+    "local": "evidence/theos/SpringBoard/SpringBoard.h",
+    "bytes": 2665
+  }
+]

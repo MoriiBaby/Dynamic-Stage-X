@@ -1,0 +1,17 @@
+COMMAND: /usr/bin/python3 Scripts/check_source.py
+STDOUT:
+SOURCE CONTRACTS ONLY; not Swift/iOS compilation or runtime verification.
+
+STDERR:
+test_build_source_closure (__main__.SourceContracts.test_build_source_closure) ... ok
+test_entry_symbols_match (__main__.SourceContracts.test_entry_symbols_match) ... ok
+test_identity (__main__.SourceContracts.test_identity) ... ok
+test_no_runtime_reference_copy_or_upper_gate (__main__.SourceContracts.test_no_runtime_reference_copy_or_upper_gate) ... ok
+test_plists_and_injection (__main__.SourceContracts.test_plists_and_injection) ... ok
+test_privacy_and_defaults (__main__.SourceContracts.test_privacy_and_defaults) ... ok
+test_state_and_cleanup_integration (__main__.SourceContracts.test_state_and_cleanup_integration) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.378s
+
+OK

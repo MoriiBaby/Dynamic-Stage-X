@@ -1,0 +1,10 @@
+.theos/
+packages/
+.build/
+.DS_Store
+*.deb
+*.ipa
+*.dSYM/
+__pycache__/
+*.pyc
+Reports/*.json

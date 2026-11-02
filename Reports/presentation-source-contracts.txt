@@ -1,0 +1,6 @@
+COMMAND: /usr/bin/python3 Tests/Presentation/verify_source_contract.py
+STDOUT:
+PASS: source contract scans (7 Swift files); not functional proof.
+NOT RUN: Swift/iOS compilation, UIKit XCTest, animation compositor, native hosts/touch/focus.
+
+STDERR:

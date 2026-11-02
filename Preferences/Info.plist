@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>CFBundleIdentifier</key><string>com.tsangbaby.dynamicstagex.preferences</string>
+<key>CFBundleName</key><string>Dynamic Stage X</string>
+<key>CFBundleDisplayName</key><string>Dynamic Stage X</string>
+<key>CFBundleExecutable</key><string>DynamicStageXPrefs</string>
+<key>CFBundlePackageType</key><string>BNDL</string>
+<key>CFBundleVersion</key><string>1</string>
+<key>CFBundleShortVersionString</key><string>0.1.0-alpha1</string>
+<key>CFBundleDevelopmentRegion</key><string>zh-Hans</string>
+<key>NSPrincipalClass</key><string>DXPreferencesController</string>
+<key>MinimumOSVersion</key><string>15.0</string>
+</dict></plist>

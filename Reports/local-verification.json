@@ -1,0 +1,40 @@
+{
+  "product": "Dynamic Stage X",
+  "package": "com.tsangbaby.dynamicstagex",
+  "source_version": "0.1.0-alpha1",
+  "checks": [
+    {
+      "check": "source-contracts",
+      "returncode": 0,
+      "log": "Reports/source-contracts.txt"
+    },
+    {
+      "check": "core-source-contracts",
+      "returncode": 0,
+      "log": "Reports/core-source-contracts.txt"
+    },
+    {
+      "check": "presentation-source-contracts",
+      "returncode": 0,
+      "log": "Reports/presentation-source-contracts.txt"
+    },
+    {
+      "check": "bridge-C-and-evidence",
+      "returncode": 0,
+      "log": "Reports/bridge-C-and-evidence.txt"
+    },
+    {
+      "check": "swift-grammar-only",
+      "returncode": 0,
+      "log": "Reports/swift-grammar-only.txt"
+    }
+  ],
+  "scope": "C production policy execution, source contracts and optional Swift grammar only",
+  "swift_compiler_available": false,
+  "xcrun_available": false,
+  "swift_XCTest_executed": false,
+  "iOS_build_executed": false,
+  "device_actions_executed": false,
+  "remote_writes_executed": false,
+  "all_requested_local_checks_passed": true
+}

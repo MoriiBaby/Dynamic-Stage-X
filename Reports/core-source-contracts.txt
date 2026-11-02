@@ -1,0 +1,16 @@
+COMMAND: /usr/bin/python3 Tests/Core/verify_source_contract.py
+STDOUT:
+SOURCE CONTRACT ONLY; Swift compilation and XCTest execution are NOT performed.
+
+STDERR:
+test_delimiters_balance_lexically (__main__.SourceContractTests.test_delimiters_balance_lexically) ... ok
+test_manifest_is_core_only (__main__.SourceContractTests.test_manifest_is_core_only) ... ok
+test_preferred_state_and_keyboard_contract (__main__.SourceContractTests.test_preferred_state_and_keyboard_contract) ... ok
+test_production_uses_only_foundation (__main__.SourceContractTests.test_production_uses_only_foundation) ... ok
+test_public_types_exist (__main__.SourceContractTests.test_public_types_exist) ... ok
+test_xctests_import_real_target (__main__.SourceContractTests.test_xctests_import_real_target) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.091s
+
+OK
