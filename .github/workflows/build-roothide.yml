@@ -2,7 +2,7 @@ name: RootHide Mac test build
 
 on:
   push:
-    branches: [fix/preferences-alpha2]
+    branches: [fix/trigger-alpha3]
   workflow_dispatch:
 
 permissions:
@@ -64,6 +64,11 @@ jobs:
         run: |
           set -euo pipefail
           python3 ci/test_preferences_simulator.py 2>&1 | tee build-evidence/preferences-simulator.txt
+      - name: Real coordinate swipe regression on simulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 ci/test_trigger_simulator.py --runtime 18.5 --device-type 'iPhone 16 Pro' 2>&1 | tee build-evidence/trigger-simulator.txt
       - name: Compile sign and package native RootHide
         shell: bash
         run: |
@@ -77,7 +82,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: Dynamic-Stage-X-roothide-alpha2-${{ github.run_id }}
+          name: Dynamic-Stage-X-roothide-alpha3-${{ github.run_id }}
           path: |
             packages/*.deb
             build-evidence/

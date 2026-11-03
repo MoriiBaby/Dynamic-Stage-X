@@ -6,22 +6,27 @@ internal enum DXEdgeTriggerPolicy {
               [safeArea.top, safeArea.left, safeArea.bottom, safeArea.right].allSatisfy({ $0.isFinite && $0 >= 0 })
         else { return .zero }
         let usable = bounds.inset(by: safeArea)
-        guard usable.width >= 52, usable.height >= 80 else { return .zero }
-        let x = side == "left" ? usable.minX + 10 : usable.maxX - 42
-        // Above the home indicator, not on the system's bottom edge.
-        return CGRect(x: x, y: usable.maxY - 64, width: 32, height: 56)
+        guard usable.width >= 64, usable.height >= 112 else { return .zero }
+        // Reserve a forgiving corner strip above the Home indicator. The visible mark stays
+        // much smaller; the hit target is 64×88pt so a bottom-corner swipe is not pixel-precise.
+        let x = side == "left" ? usable.minX : usable.maxX - 64
+        return CGRect(x: x, y: usable.maxY - 96, width: 64, height: 88)
     }
 
     static func mayBegin(translation: CGPoint, velocity: CGPoint) -> Bool {
         guard finite(translation), finite(velocity) else { return false }
-        return translation.y <= -8 && -translation.y >= abs(translation.x) * 1.7 &&
-            velocity.y <= -100 && -velocity.y >= abs(velocity.x) * 1.4
+        // UIPan owns the initial slop threshold. Its delegate can be asked before a
+        // useful translation/velocity sample is exposed (including zero/zero). Never
+        // permanently fail that undecided first sample; decide upward intent at release.
+        return true
     }
 
     static func mayFinish(translation: CGPoint, velocity: CGPoint, elapsed: TimeInterval) -> Bool {
         guard finite(translation), finite(velocity), elapsed.isFinite else { return false }
-        return elapsed >= 0.05 && elapsed <= 1.5 && translation.y <= -72 &&
-            abs(translation.x) <= max(28, -translation.y * 0.45) && velocity.y <= 100
+        // elapsed is recognition-to-release, not touch-down-to-release. A deliberate
+        // fast swipe must not fail merely because UIKit recognized it near the end.
+        return elapsed >= 0 && elapsed <= 2.8 && translation.y <= -48 &&
+            abs(translation.x) <= max(52, -translation.y * 0.9) && velocity.y <= 220
     }
 
     private static func finite(_ point: CGPoint) -> Bool { return point.x.isFinite && point.y.isFinite }
@@ -49,6 +54,10 @@ private final class DXEdgeHandle: UIView {
         super.layoutSubviews()
         indicator.frame = CGRect(x: bounds.midX - 3, y: bounds.midY - 14, width: 6, height: 28)
     }
+    func showTracking(_ active: Bool) {
+        indicator.backgroundColor = active ? .systemBlue : UIColor.label.withAlphaComponent(0.45)
+        accessibilityValue = active ? "正在识别上滑" : "等待上滑"
+    }
     override func accessibilityActivate() -> Bool { return activate?() ?? false }
 }
 
@@ -71,16 +80,20 @@ private final class DXEdgeRootView: UIView {
     }
 }
 
-/// Full-window coordinates are allowed, but the only interactive area is 32 x 56pt.
+/// Full-window coordinates are allowed, but the only interactive area is 64 x 88pt.
 /// Parent owns visibility and system-context gating; this window can never be key.
 final class DXEdgeTriggerWindow: UIWindow, UIGestureRecognizerDelegate {
     var onTrigger: (() -> Void)?
+    /// Bounded stage feedback only; no coordinates, touch histories or app contents.
+    var onGestureFeedback: ((String) -> Void)?
     var triggerSide: String {
         get { return edgeRoot.side }
         set {
             precondition(Thread.isMainThread)
+            let normalized = newValue.lowercased() == "left" ? "left" : "right"
+            guard normalized != edgeRoot.side else { return }
             resetTracking(cancelRecognizer: true)
-            edgeRoot.side = newValue.lowercased() == "left" ? "left" : "right"
+            edgeRoot.side = normalized
         }
     }
     var isContextEnabled = true {
@@ -164,8 +177,11 @@ final class DXEdgeTriggerWindow: UIWindow, UIGestureRecognizerDelegate {
     }
 
     override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        guard gestureRecognizer === pan, contextIsUsable else { return false }
-        return DXEdgeTriggerPolicy.mayBegin(translation: pan.translation(in: self), velocity: pan.velocity(in: self))
+        guard gestureRecognizer === pan else { return super.gestureRecognizerShouldBegin(gestureRecognizer) }
+        guard contextIsUsable else { onGestureFeedback?("context-rejected"); return false }
+        let permitted = DXEdgeTriggerPolicy.mayBegin(translation: pan.translation(in: self), velocity: pan.velocity(in: self))
+        if !permitted { onGestureFeedback?("begin-rejected") }
+        return permitted
     }
 
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
@@ -182,6 +198,8 @@ final class DXEdgeTriggerWindow: UIWindow, UIGestureRecognizerDelegate {
         switch recognizer.state {
         case .began:
             beganAt = ProcessInfo.processInfo.systemUptime
+            edgeRoot.handle.showTracking(true)
+            onGestureFeedback?("began")
         case .ended:
             let elapsed = beganAt.map { ProcessInfo.processInfo.systemUptime - $0 }
             let accepted = elapsed.map {
@@ -189,15 +207,22 @@ final class DXEdgeTriggerWindow: UIWindow, UIGestureRecognizerDelegate {
                                               velocity: recognizer.velocity(in: self), elapsed: $0)
             } ?? false
             resetTracking(cancelRecognizer: false)
-            if accepted, contextIsUsable { onTrigger?() }
+            if accepted, contextIsUsable {
+                onGestureFeedback?("accepted")
+                onTrigger?()
+            } else {
+                onGestureFeedback?("release-rejected")
+            }
         case .cancelled, .failed:
             resetTracking(cancelRecognizer: false)
+            onGestureFeedback?("cancelled")
         default: break
         }
     }
 
     private func resetTracking(cancelRecognizer: Bool) {
         beganAt = nil
+        edgeRoot.handle.showTracking(false)
         guard isConfigured, cancelRecognizer, pan.isEnabled else { return }
         // Cancel only OUR recognizer. UIKit cannot replay an already-delivered
         // touch stream to an underlying window; the reservation is deliberately tiny.

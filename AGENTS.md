@@ -1,7 +1,7 @@
 # Dynamic Stage X — local source implementation
 
 - Product: Dynamic Stage X; package ID: com.tsangbaby.dynamicstagex.
-- Current scope (2026-11-02 user testing feedback): fix Preferences-page crash and rebuild the native RootHide test package on `fix/preferences-alpha2`. Preserve main, original source snapshot and alpha1 branch. No merge, Release, device connection/attach, user-device install or respring. An ephemeral cloud iOS Simulator may run isolated UIKit regression tests; its Preferences superclass is a test double and is not device verification.
+- Current scope (2026-11-03 testing feedback): fix visible edge trigger that does not respond, and deliver native RootHide alpha3 from `fix/trigger-alpha3`. Preserve main/alpha1/alpha2. Keep the working Preferences architecture and private Scene ABI/ownership checks. No merge, Release, user-device connection/attach/install/respring. Ephemeral cloud Simulator may execute real XCUI touch tests of the production trigger, not SpringBoard-device proof.
 - Target: iOS 15.0+, no maximum-version gate. Swift-first, UIKit/CoreAnimation, minimal ObjC/C private-API bridge.
 - Independent code: do not translate the reference binary, copy its resources/classes, or use its package as a dependency.
 - Private calls require exact runtime ABI checks. Missing capabilities must produce explicit failure and retain native behavior. A view that only displays pixels is not a complete interactive scene.

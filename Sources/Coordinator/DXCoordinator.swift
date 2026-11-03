@@ -38,6 +38,7 @@ final class DXCoordinator {
     private var lastCleanupError: Error?
     private let notice = DXFailureNotice()
     private let sceneCommands = DXSceneCommandQueue()
+    private var lastTriggerNoticeAt: TimeInterval = -10
 
     private init() {}
 
@@ -110,6 +111,10 @@ final class DXCoordinator {
             let window = DXEdgeTriggerWindow(windowScene: scene)
             window.windowLevel = .statusBar + 2
             window.onTrigger = { [weak self] in self?.triggered() }
+            window.onGestureFeedback = { [weak self] stage in
+                guard stage == "release-rejected" else { return }
+                self?.triggerNotice("已收到滑动，请向上划过约半个触发区后松手。")
+            }
             trigger = window
         }
         trigger?.triggerSide = preferences.triggerSide
@@ -118,15 +123,56 @@ final class DXCoordinator {
     }
 
     private func triggered() {
-        if machine.phase == .collapsed { resume(); return }
-        guard !busy, !dismissing, overlay == nil, preferences.enabled,
-              !bridge.isLocked(), let scene = displayScene(), scene.interfaceOrientation.isPortrait,
-              let identifier = bridge.frontmostApplicationIdentifier(),
-              DXPreferences.validIdentifier(identifier), identifier != "com.apple.springboard",
-              machine.phase == .idle else { return }
-        guard machine.beginSelection() != nil else { return }
+        if machine.phase == .collapsed {
+            guard !busy, !dismissing, top?.isValid == true, bottom?.isValid == true else {
+                triggerNotice("收起的窗口会话已失效，请关闭后重新开启分屏。")
+                return
+            }
+            resume()
+            return
+        }
+        let scene = displayScene()
+        let identifier = bridge.frontmostApplicationIdentifier()
+        let locked = bridge.isLocked()
+        if let reason = DXTriggerEligibility.denial(enabled: preferences.enabled, locked: locked,
+            hasMainScene: scene != nil, portrait: scene?.interfaceOrientation.isPortrait == true,
+            busy: busy, dismissing: dismissing, hasOverlay: overlay != nil,
+            phase: machine.phase, frontmostIdentifier: identifier) {
+            // A marker may remain visible while a system context changes. Do not bypass
+            // lock/Scene/foreground authority just to make an explicit swipe look successful.
+            let message: String
+            switch reason {
+            case .disabled: message = "Dynamic Stage X 尚未启用。"
+            case .locked: return // Never present plugin UI over the lock screen.
+            case .sceneUnavailable: message = "已识别上滑，但无法唯一确定系统主显示场景。"
+            case .portraitRequired: message = "请在竖屏应用中触发上下分屏。"
+            case .busy: message = "正在处理窗口请求，请稍后再试。"
+            case .dismissing: message = "正在恢复原窗口，请稍后再试。"
+            case .existingOverlay: message = "已有分屏窗口，请先关闭当前会话。"
+            case .missingFrontmost: message = "已识别上滑，但系统未能提供前台应用标识。"
+            case .homeScreen: message = "请先打开一个 App，再从底角触发条向上滑动。"
+            case .invalidFrontmost: message = "已识别上滑，但前台应用标识无法安全使用。"
+            case .stateConflict: message = "分屏状态尚未回到空闲，请关闭当前会话后重试。"
+            }
+            triggerNotice(message)
+            return
+        }
+        guard let scene = scene, let identifier = identifier,
+              machine.beginSelection() != nil else {
+            triggerNotice("无法开始新的分屏会话。")
+            return
+        }
         token = machine.token
         beginSession(topIdentifier: identifier, desiredBottom: nil, in: scene)
+    }
+
+    private func triggerNotice(_ message: String) {
+        let now = ProcessInfo.processInfo.systemUptime
+        guard now - lastTriggerNoticeAt >= 1.5, !bridge.isLocked(),
+              let scene = displayScene() ?? trigger?.windowScene,
+              scene.activationState == .foregroundActive else { return }
+        lastTriggerNoticeAt = now
+        notice.show(message, in: scene)
     }
 
     private func beginSession(topIdentifier identifier: String, desiredBottom: String?, in scene: UIWindowScene) {

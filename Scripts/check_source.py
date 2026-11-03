@@ -78,7 +78,7 @@ class SourceContracts(unittest.TestCase):
         if workflows.exists():
             self.assertEqual({p.name for p in workflows.iterdir()}, {'build-roothide.yml'})
             workflow = (workflows / 'build-roothide.yml').read_text()
-            self.assertIn('branches: [fix/preferences-alpha2]', workflow)
+            self.assertIn('branches: [fix/trigger-alpha3]', workflow)
             self.assertIn('contents: read', workflow)
             self.assertNotRegex(workflow, r'(?m)^\s+run:.*(?:make install|respring|ssh )')
 

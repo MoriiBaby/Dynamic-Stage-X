@@ -38,7 +38,7 @@ private final class DXSettingsListController: UITableViewController {
     override func numberOfSections(in tableView: UITableView) -> Int { 2 }
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int { section == 0 ? keys.count : 1 }
     override func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
-        section == 0 ? "竖屏上下双窗。键盘出现时输入应用临时占据键盘上方区域，收起键盘后恢复。系统目标 iOS 15.0+，具体能力以运行时适配与验证为准。" : "开发者 Tsangbaby · 0.1.0-alpha2\n此设置不会安装、重启或强制关闭任何应用。"
+        section == 0 ? "竖屏上下双窗。键盘出现时输入应用临时占据键盘上方区域，收起键盘后恢复。系统目标 iOS 15.0+，具体能力以运行时适配与验证为准。" : "开发者 Tsangbaby · 0.1.0-alpha3\n此设置不会安装、重启或强制关闭任何应用。"
     }
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .value1, reuseIdentifier: nil)

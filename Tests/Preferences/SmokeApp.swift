@@ -66,8 +66,8 @@ final class DXPreferencesSmokeApp: UIResponder, UIApplicationDelegate {
             let cell = dataSource.tableView(table, cellForRowAt: IndexPath(row: row, section: 0))
             check(cell.textLabel?.text == expected[row], "row title mismatch \(row)")
         }
-        check(list.tableView(table, titleForFooterInSection: 1)?.contains("0.1.0-alpha2") == true,
-              "about footer did not identify alpha2")
+        check(list.tableView(table, titleForFooterInSection: 1)?.contains("0.1.0-alpha3") == true,
+              "about footer did not identify alpha3")
         let old = CFPreferencesCopyAppValue("enabled" as CFString, domain)
         let cell = dataSource.tableView(table, cellForRowAt: IndexPath(row: 0, section: 0))
         if let toggle = cell.accessoryView as? UISwitch {
