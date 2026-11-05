@@ -12,7 +12,7 @@ NSNotificationName const DXSystemKeyboardFocusChangedNotification = @"com.tsangb
 /* Minimal declaration solely to make ARC consume alloc/return init ownership correctly.
    No private class reference is linked: lookup is NSClassFromString, ABI checked before send. */
 @interface UIScenePresentationManager : NSObject
-- (instancetype)_initWithScene:(id)scene;
+- (instancetype)_initWithScene:(id)scene __attribute__((objc_method_family(init)));
 @end
 
 @interface DXApplicationRecord ()
@@ -40,6 +40,14 @@ NSNotificationName const DXSystemKeyboardFocusChangedNotification = @"com.tsangb
 @property (nonatomic, copy) NSString *sceneIdentifier;
 @property (nonatomic) pid_t processIdentifier;
 @property (nonatomic) BOOL released;
+@property (nonatomic, copy) NSDictionary<NSString *, id> *readinessSnapshot;
+@property (nonatomic) BOOL hostDetached;
+@property (nonatomic) BOOL presenterDeactivated;
+@property (nonatomic) BOOL presenterInvalidated;
+@property (nonatomic) BOOL settingsRestored;
+@property (nonatomic) BOOL referencesDropped;
+@property (nonatomic, strong) NSError *referenceFailure;
+@property (nonatomic, strong) NSMutableArray *releaseWaiters;
 @property (nonatomic) BOOL invalidated;
 @property (nonatomic) BOOL observed;
 @property (nonatomic) BOOL interactive;
@@ -60,6 +68,15 @@ NSNotificationName const DXSystemKeyboardFocusChangedNotification = @"com.tsangb
 
 @interface DXSystemBridge ()
 @property (nonatomic, strong) NSMutableDictionary<NSString *, DXSystemSceneHandle *> *handles;
+@property (nonatomic, strong) NSMutableSet<DXSystemSceneHandle *> *recovery;
+@property (nonatomic, strong) NSMutableSet<DXBridgeOperation *> *acquisitions;
+@property (nonatomic, strong) NSMutableArray *releaseAllWaiters;
+@property (nonatomic, strong) NSError *releaseAllError;
+@property (nonatomic, strong) NSError *observationError;
+@property (nonatomic) NSUInteger epoch; // Access cross-thread only inside @synchronized(self).
+@property (nonatomic) NSUInteger barriersRequested;
+@property (nonatomic) NSUInteger releaseAllInFlight;
+@property (nonatomic) BOOL releaseAllScheduling;
 @property (nonatomic, strong) id processObserverManager;
 @property (nonatomic, strong) id focusObserverToken;
 @property (nonatomic, strong) id focusObserverController;
@@ -74,24 +91,22 @@ NSNotificationName const DXSystemKeyboardFocusChangedNotification = @"com.tsangb
 @property (nonatomic, strong) dispatch_source_t watchdog;
 - (instancetype)initPrivate;
 - (BOOL)ownsLiveHandle:(DXSystemSceneHandle *)handle;
+- (NSUInteger)ownedResourceCount;
 - (void)invalidateHandle:(DXSystemSceneHandle *)handle;
 - (NSError * _Nullable)tearDown:(DXSystemSceneHandle *)handle;
+- (void)maybeFinishReleaseAll;
+- (NSError * _Nullable)endObserving;
+- (BOOL)cleanupConfirmed:(DXSystemSceneHandle *)handle;
 @end
 
 static id DXShared(NSString *className, SEL selector) {
-    Class cls = NSClassFromString(className);
+    Class cls = DXRuntimeClass(className);
     if (!cls) DXThrow(DXSystemBridgeErrorUnavailable, [@"Missing class: " stringByAppendingString:className]);
     id object = DXObject(cls, selector);
     if (!object) DXThrow(DXSystemBridgeErrorUnavailable, [@"Missing system singleton: " stringByAppendingString:className]);
     return object;
 }
 static void DXRequire(BOOL condition, NSInteger code, NSString *message) { if (!condition) DXThrow(code, message); }
-static NSError *DXIncludingCleanup(NSError *primary, NSError *cleanup) {
-    if (!cleanup) return primary;
-    NSMutableDictionary *info=[primary.userInfo mutableCopy];
-    info[NSUnderlyingErrorKey]=cleanup;
-    return [NSError errorWithDomain:primary.domain code:primary.code userInfo:info];
-}
 static NSString *DXString(id object) { return [object isKindOfClass:NSString.class] && [object length] ? object : nil; }
 static NSArray *DXCollection(id object) {
     if ([object isKindOfClass:NSSet.class]) return [object allObjects];
@@ -104,7 +119,25 @@ static id DXMainManager(void) { return DXShared(@"SBSceneManagerCoordinator", @s
 static id DXWorkspace(void) { return DXShared(@"SBMainWorkspace", @selector(sharedInstance)); }
 static id DXFocusController(void) { return DXObject(DXWorkspace(), @selector(keyboardFocusController)); }
 static id DXSettings(id scene) { id s = DXObject(scene, @selector(settings)); DXRequire(s != nil, DXSystemBridgeErrorUnavailable, @"Scene has no settings"); return s; }
-static BOOL DXSpringBoard(void) { return [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.apple.springboard"]; }
+static BOOL DXSpringBoard(void) {
+#if DX_SCENE_BRIDGE_TESTING
+    return DXSceneBridgeTestingSpringBoard();
+#else
+    return [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.apple.springboard"];
+#endif
+}
+static void DXCheckpoint(NSString *stage, id object) {
+#if DX_SCENE_BRIDGE_TESTING
+    DXSceneBridgeTestingCheckpoint(stage,object);
+#else
+    (void)stage; (void)object;
+#endif
+}
+static NSError *DXCleanupCaught(NSException *e, NSString *stage) {
+    NSError *error=DXCaught(e); NSMutableDictionary *info=[error.userInfo mutableCopy];
+    info[DXSceneOperationKey]=@"release"; info[DXSceneStageKey]=stage;
+    return [NSError errorWithDomain:error.domain code:error.code userInfo:info];
+}
 static BOOL DXSceneStillRegistered(id scene) {
     if (!scene || !DXBool(scene,@selector(isValid))) return NO;
     NSString *sid = DXString(DXObject(scene,@selector(identifier)));
@@ -134,6 +167,10 @@ static void DXWriteSettings(id scene, id settings) {
     }
     return self;
 }
+- (NSDictionary<NSString *, id> *)readiness {
+    if (!NSThread.isMainThread) return @{};
+    return self.readinessSnapshot ?: @{@"phase":@"not-applied",@"pending":@[@"settings",@"scene",@"process",@"presenter",@"layers",@"events"],@"checks":@{},@"reasons":@{}};
+}
 - (BOOL)isValid {
     if (!NSThread.isMainThread) return NO;
     @try { return [self.owner ownsLiveHandle:self]; } @catch (__unused NSException *e) { return NO; }
@@ -143,9 +180,14 @@ static void DXWriteSettings(id scene, id settings) {
 }
 @end
 
+#include "DXSceneReadiness.inc"
+
 @implementation DXSystemBridge
 - (instancetype)initPrivate {
-    if ((self=[super init])) _handles=[NSMutableDictionary dictionary];
+    if ((self=[super init])) {
+        _handles=[NSMutableDictionary dictionary]; _recovery=[NSMutableSet set];
+        _acquisitions=[NSMutableSet set]; _releaseAllWaiters=[NSMutableArray array];
+    }
     return self;
 }
 + (instancetype)sharedBridge {
@@ -192,7 +234,7 @@ static void DXWriteSettings(id scene, id settings) {
 
 - (id)uniqueSceneForIdentifier:(NSString *)identifier {
     NSMutableArray *matches=[NSMutableArray array];
-    Protocol *settingsProtocol=NSProtocolFromString(@"UIApplicationSceneSettings");
+    Protocol *settingsProtocol=DXRuntimeProtocol(@"UIApplicationSceneSettings");
     DXRequire(settingsProtocol!=nil,DXSystemBridgeErrorUnavailable,@"UIApplicationSceneSettings protocol unavailable");
     for (id scene in DXCollection(DXObject(DXMainManager(),@selector(allScenes)))) {
         if (!DXBool(scene,@selector(isValid))) continue;
@@ -217,62 +259,22 @@ static void DXWriteSettings(id scene, id settings) {
     if (h.presentationManager && DXObject(h.presentationManager,@selector(scene))!=h.scene) return NO;
     return DXObject1(DXMainManager(),@selector(existingSceneHandleForScene:),h.scene)!=nil;
 }
+- (NSUInteger)ownedResourceCount {
+    NSMutableSet *owned=[NSMutableSet setWithArray:self.handles.allValues];
+    [owned unionSet:self.recovery];
+    return owned.count;
+}
 - (void)requireUsableContext {
     DXRequire(DXSpringBoard() && !self.isLocked,DXSystemBridgeErrorLocked,@"SpringBoard is locked or lock state unavailable");
-    DXRequire(!self.contextLost && !self.restorations,DXSystemBridgeErrorOwnership,@"Native context changed or restoration in progress; finish recovery first");
+    DXRequire(!self.contextLost && !self.restorations && !self.recovery.count && !self.observationError,DXSystemBridgeErrorOwnership,@"Native context changed or restoration in progress; finish recovery first");
     NSString *front=self.frontmostApplicationIdentifier;
     BOOL allowed=NO;
     for (DXSystemSceneHandle *h in self.handles.allValues) if (!h.released && [h.bundleIdentifier isEqualToString:front]) allowed=YES;
     DXRequire(allowed,DXSystemBridgeErrorOwnership,@"Frontmost native application is not a leased target (or unknown)");
 }
-- (void)acquireSceneForBundleIdentifier:(NSString *)identifier completion:(void (^)(DXSystemSceneHandle *, NSError *))completion {
-    NSString *bid=[identifier copy];
-    __block DXSystemSceneHandle *result=nil;
-    DXBridgeOperation *op=[[DXBridgeOperation alloc] initWithTimeout:2 completion:^(NSError *error) {
-        if (error && result) [self tearDown:result];
-        completion(error ? nil : result,error);
-    }];
-    [op start:^{
-        DXRequire(DXSpringBoard() && !self.isLocked,DXSystemBridgeErrorLocked,@"Acquire refused while locked or outside SpringBoard");
-        DXRequire(!self.nativePending && !self.contextLost && !self.restorations,DXSystemBridgeErrorOwnership,@"Native activation or context recovery in progress");
-        DXRequire(DXString(bid)!=nil && ![bid isEqualToString:@"com.apple.springboard"],DXSystemBridgeErrorNoScene,@"Invalid application identifier");
-        DXRequire(self.handles.count<3,DXSystemBridgeErrorOwnership,@"At most three bounded leases (two visible plus one replacement staging) may be owned");
-        for (DXSystemSceneHandle *h in self.handles.allValues)
-            DXRequire(![h.bundleIdentifier isEqualToString:bid],DXSystemBridgeErrorOwnership,@"Application is already leased");
-        id scene=[self uniqueSceneForIdentifier:bid];
-        result=[[DXSystemSceneHandle alloc] initWithOwner:self scene:scene];
-        DXRequire(result.sceneIdentifier.length && !self.handles[result.sceneIdentifier],DXSystemBridgeErrorOwnership,@"Scene already owned or has no stable identifier");
-        DXRequire(DXProtocolABI(@"FBSceneObserver",@selector(sceneDidInvalidate:),"v@:@",NO),DXSystemBridgeErrorABI,@"FBSceneObserver invalidation callback ABI unavailable");
-        DXCheckedIMP(scene,@selector(addObserver:),"v","@"); DXCheckedIMP(scene,@selector(removeObserver:),"v","@");
-        class_addProtocol(DXSystemSceneHandle.class,NSProtocolFromString(@"FBSceneObserver"));
-        Class cls=NSClassFromString(@"UIScenePresentationManager");
-        DXRequire(cls!=nil,DXSystemBridgeErrorUnavailable,@"UIScenePresentationManager unavailable; raw pixel-host fallback is not interactive");
-        UIScenePresentationManager *allocated=[cls alloc];
-        DXCheckedIMP(allocated,@selector(_initWithScene:),"@","@");
-        result.presentationManager=[allocated _initWithScene:scene];
-        DXRequire(result.presentationManager!=nil,DXSystemBridgeErrorSystemRejected,@"Native presentation manager rejected scene");
-        result.presenter=DXObject1(result.presentationManager,@selector(createPresenterWithIdentifier:),
-                                  [@"com.tsangbaby.dynamicstagex/" stringByAppendingString:NSUUID.UUID.UUIDString]);
-        DXRequire(result.presenter!=nil,DXSystemBridgeErrorSystemRejected,@"Native presenter was not created");
-        DXCheckedIMP(result.presenter,@selector(invalidate),"v","");
-        DXCheckedIMP(result.presenter,@selector(deactivate),"v","");
-        DXCheckedIMP(result.presenter,@selector(activate),"v","");
-        DXCheckedIMP(result.presenter,@selector(isHosting),@encode(bool),"");
-        DXCheckedIMP(result.presenter,@selector(isActive),@encode(bool),"");
-        DXCheckedIMP(result.presenter,@selector(isInvalidated),@encode(bool),"");
-        UIView *view=DXObject(result.presenter,@selector(presentationView));
-        DXRequire([view isKindOfClass:NSClassFromString(@"_UIScenePresentationView")] && !view.superview,
-                  DXSystemBridgeErrorOwnership,@"Presenter did not return a fresh own native presentation view");
-        result.hostView=view;
-        DXRequire(DXObject(result.presenter,@selector(scene))==scene,DXSystemBridgeErrorOwnership,@"Presenter resolved a different scene");
-        self.handles[result.sceneIdentifier]=result;
-        result.observed=YES; DXVoid1(scene,@selector(addObserver:),result);
-        [self beginObserving];
-    }];
-}
-
+#include "DXSceneAcquire.inc"
 - (void)configurePresenter:(DXSystemSceneHandle *)h frame:(CGRect)frame operation:(DXBridgeOperation *)op {
-    Class tc=NSClassFromString(@"UIMutableTransformer"), transformClass=NSClassFromString(@"UITransform");
+    Class tc=DXRuntimeClass(@"UIMutableTransformer"), transformClass=DXRuntimeClass(@"UITransform");
     DXRequire(tc && transformClass,DXSystemBridgeErrorUnavailable,@"Native host-coordinate transformer unavailable");
     id transformer=[tc new];
     SEL translation=@selector(translation:);
@@ -285,7 +287,7 @@ static void DXWriteSettings(id scene, id settings) {
     void (^change)(id)=^(id context) {
         if (!accepting || !NSThread.isMainThread || !weakOp || weakOp.finished || weakHandle.released) return;
         @try {
-            DXRequire([context isKindOfClass:NSClassFromString(@"UIMutableScenePresentationContext")],DXSystemBridgeErrorABI,@"Unexpected mutable presentation context");
+            DXRequire([context isKindOfClass:DXRuntimeClass(@"UIMutableScenePresentationContext")],DXSystemBridgeErrorABI,@"Unexpected mutable presentation context");
             DXCheckedIMP(context,@selector(setHostTransformer:),"v","@");
             DXCheckedIMP(context,@selector(setResizesHostedContext:),"v",@encode(bool));
             DXCheckedIMP(context,@selector(setClippingDisabled:),"v",@encode(bool));
@@ -311,36 +313,49 @@ static void DXWriteSettings(id scene, id settings) {
     NSString *hitArguments=[NSString stringWithFormat:@"%s@@",@encode(CGPoint)];
     DXCheckedIMP(h.hostView,@selector(_hitTest:withEvent:windowServerHitTestWindow:),"@",hitArguments.UTF8String);
     id container=DXObject(h.hostView,@selector(hostContainerView));
-    if (![container isKindOfClass:NSClassFromString(@"_UISceneLayerHostContainerView")] ||
-        DXObject(container,@selector(scene))!=h.scene) return NO;
     DXCheckedIMP(container,@selector(_hitTest:withEvent:windowServerHitTestWindow:),"@",hitArguments.UTF8String);
+    return [self nativeLayerBindingReady:h];
+}
+- (BOOL)nativeLayerBindingReady:(DXSystemSceneHandle *)h {
+    id container=DXObject(h.hostView,@selector(hostContainerView));
+    if (![container isKindOfClass:DXRuntimeClass(@"_UISceneLayerHostContainerView")] ||
+        DXObject(container,@selector(scene))!=h.scene) return NO;
     NSArray *sceneLayers=DXCollection(DXObject(DXObject(h.scene,@selector(layerManager)),@selector(layers)));
     NSArray *hosted=DXCollection(DXObject(container,@selector(hostedLayers)));
     for (UIView *view in DXCollection(DXObject(container,@selector(_hostViews)))) {
-        if (![view isKindOfClass:NSClassFromString(@"_UISceneLayerHostView")]) continue;
+        if (![view isKindOfClass:DXRuntimeClass(@"_UISceneLayerHostView")]) continue;
         id layer=DXObject(view,@selector(sceneLayer));
         if ([sceneLayers indexOfObjectIdenticalTo:layer]==NSNotFound || [hosted indexOfObjectIdenticalTo:layer]==NSNotFound ||
             DXBool(layer,@selector(isKeyboardLayer)) || DXBool(layer,@selector(isKeyboardProxyLayer))) continue;
         unsigned int context=DXUInt32(layer,@selector(contextID));
-        if (!context || ![view.layer isKindOfClass:NSClassFromString(@"CALayerHost")]) continue;
+        if (!context || ![view.layer isKindOfClass:DXRuntimeClass(@"CALayerHost")]) continue;
         if (DXUInt32(view.layer,@selector(contextId))==context) return YES;
     }
     return NO;
 }
+#include "DXSceneReadinessMethods.inc"
 - (void)applyFrame:(CGRect)frame toHandle:(DXSystemSceneHandle *)h completion:(void (^)(NSError *))completion {
     __weak DXSystemSceneHandle *weakHandle=h;
     __block BOOL ownsOperation=NO;
     __block DXBridgeOperation *operation;
     operation=[[DXBridgeOperation alloc] initWithTimeout:2 completion:^(NSError *error) {
         DXSystemSceneHandle *handle=weakHandle;
+        if (error && handle && ownsOperation) {
+            NSDictionary *snapshot=[self readinessForHandle:handle];
+            NSMutableDictionary *info=[error.userInfo mutableCopy]; info[DXSceneReadinessKey]=snapshot;
+            error=[NSError errorWithDomain:error.domain code:error.code userInfo:info];
+        }
         if (handle.operation==operation) handle.operation=nil;
         operation=nil;
         if (error && ownsOperation && handle.owner==self && !handle.released) {
-            [self releaseHandle:handle completion:^(NSError *cleanupError) { completion(DXIncludingCleanup(error,cleanupError)); }];
+            [self releaseHandle:handle completion:^(NSError *cleanupError) { completion(DXErrorWithCleanup(error,cleanupError)); }];
         } else completion(error);
     }];
+    operation.name=@"apply";
+    operation.diagnostics=h.readiness;
     __weak DXBridgeOperation *weakOp=operation;
     [operation start:^{
+        [weakOp enterStage:@"eligibility"];
         DXRequire([self ownsLiveHandle:h],DXSystemBridgeErrorStaleHandle,@"Frame update has stale scene/process/owner");
         DXRequire(!h.operation && !self.focusPending,DXSystemBridgeErrorOwnership,@"Handle or input focus is busy");
         [self requireUsableContext];
@@ -364,6 +379,7 @@ static void DXWriteSettings(id scene, id settings) {
             DXCheckedIMP(h.scene,@selector(activateWithTransitionContext:),"v","@");
             DXCheckedIMP(h.scene,@selector(deactivateWithTransitionContext:),"v","@");
         }
+        [weakOp enterStage:@"presentation-context"];
         [self configurePresenter:h frame:frame operation:weakOp];
         if (!h.changedSettings) {
             h.originalFrame=DXFrame(settings); h.originalBackgrounded=DXBool(settings,@selector(isBackgrounded));
@@ -372,17 +388,20 @@ static void DXWriteSettings(id scene, id settings) {
         DXSetFrame(mutable,frame); DXSetBool(mutable,@selector(setBackgrounded:),false);
         if (hasForeground) DXSetBool(mutable,@selector(setForeground:),true);
         h.writtenFrame=frame; h.changedSettings=YES; h.interactive=NO;
+        [weakOp enterStage:@"settings-submit"];
         if (!wasActive) { h.activatedScene=YES; DXVoid1(h.scene,@selector(activateWithTransitionContext:),nil); }
         DXWriteSettings(h.scene,mutable);
+        [weakOp enterStage:@"presenter-activate"];
         DXVoid(h.presenter,@selector(activate));
+        [weakOp enterStage:@"readiness"];
         weakOp.progress=^BOOL{
+            UIWindow *window=h.hostView.window;
+            if (window && h.hostView.superview)
+                h.hostView.frame=[h.hostView.superview convertRect:[window convertRect:frame fromWindow:nil] fromView:window];
+            weakOp.diagnostics=[self readinessForHandle:h];
             DXRequire([self ownsLiveHandle:h],DXSystemBridgeErrorStaleHandle,@"Scene invalidated during geometry acknowledgement");
             [self requireUsableContext];
-            if (!DXSettingsEqual(h) || !DXBool(h.scene,@selector(isActive)) || !DXBool(h.process,@selector(isForeground)) ||
-                !DXBool(h.presenter,@selector(isActive)) || !DXBool(h.presenter,@selector(isHosting))) return NO;
-            UIWindow *window=h.hostView.window;
-            h.hostView.frame=[h.hostView.superview convertRect:[window convertRect:frame fromWindow:nil] fromView:window];
-            if (![self nativeEventBindingReady:h]) return NO;
+            if ([weakOp.diagnostics[@"pending"] count]) return NO;
             h.interactive=YES; return YES;
         };
     }];
@@ -401,7 +420,7 @@ static void DXWriteSettings(id scene, id settings) {
         if (self.focusOperation==operation) { self.focusOperation=nil; self.focusPending=NO; }
         operation=nil;
         if (error && ownsRequest && h.owner==self && !h.released) {
-            [self releaseHandle:h completion:^(NSError *cleanupError) { completion(DXIncludingCleanup(error,cleanupError)); }];
+            [self releaseHandle:h completion:^(NSError *cleanupError) { completion(DXErrorWithCleanup(error,cleanupError)); }];
         } else completion(error);
     }];
     __weak DXBridgeOperation *weakOp=operation;
@@ -460,7 +479,8 @@ static void DXWriteSettings(id scene, id settings) {
             DXThrow(DXSystemBridgeErrorOwnership,@"Previous focus scene expired; no guessed PID or force-focus cleanup");
         }
     } @catch (NSException *e) {
-        self.focusOwner=nil; self.previousFocusScene=nil; return DXCaught(e);
+        // Keep the exact lease/previous scene for an explicit retry; do not forget a failed native request.
+        return DXCaught(e);
     }
     self.focusOwner=nil; self.previousFocusScene=nil; return nil;
 }
@@ -474,7 +494,7 @@ static void DXWriteSettings(id scene, id settings) {
     __weak DXBridgeOperation *weakOp=op;
     [op start:^{
         DXRequire(DXSpringBoard() && !self.isLocked,DXSystemBridgeErrorLocked,@"Native activation refused while locked");
-        DXRequire(!self.handles.count && !self.nativePending && !self.focusPending && !self.restorations,DXSystemBridgeErrorOwnership,@"Release all scene/focus leases and await restoration before native activation");
+        DXRequire(!self.handles.count && !self.recovery.count && !self.observationError && !self.nativePending && !self.focusPending && !self.restorations,DXSystemBridgeErrorOwnership,@"Release all scene/focus leases and await restoration before native activation");
         DXRequire(DXString(bid)!=nil && ![bid isEqualToString:@"com.apple.springboard"],DXSystemBridgeErrorNoScene,@"Invalid native application identifier");
         id app=DXObject1(DXShared(@"SBApplicationController",@selector(sharedInstance)),@selector(applicationWithBundleIdentifier:),bid);
         DXRequire(app!=nil,DXSystemBridgeErrorNoScene,@"Application is not registered with SpringBoard");
@@ -505,108 +525,7 @@ static void DXWriteSettings(id scene, id settings) {
     }];
 }
 
-- (NSError *)tearDown:(DXSystemSceneHandle *)h {
-    if (!h || h.owner!=self) return [NSError errorWithDomain:DXSystemBridgeErrorDomain code:DXSystemBridgeErrorStaleHandle userInfo:@{NSLocalizedDescriptionKey:@"Cannot release a foreign handle"}];
-    if (h.released) return nil;
-    NSError *failure=nil;
-    BOOL registryOwned=self.handles[h.sceneIdentifier]==h;
-    BOOL sceneOwned=NO;
-    @try {
-        sceneOwned=registryOwned && DXSceneStillRegistered(h.scene) && DXObject(h.scene,@selector(clientProcess))==h.process &&
-            DXPID(h.process,@selector(pid))==h.processIdentifier && DXBool(h.process,@selector(isRunning));
-    } @catch (NSException *e) { failure=DXCaught(e); }
-    h.released=YES; h.interactive=NO;
-    NSError *focusError=[self restoreFocusIfOwnedBy:h]; if (focusError) failure=focusError;
-    @try {
-        if (h.changedSettings && sceneOwned) {
-            id current=DXSettings(h.scene);
-            CGRect currentFrame=DXFrame(current);
-            bool currentBackground=DXBool(current,@selector(isBackgrounded));
-            bool currentForeground=h.hasForeground ? DXBool(current,@selector(isForeground)) : false;
-            unsigned changed=(!CGRectEqualToRect(h.originalFrame,h.writtenFrame) ? DXLeaseFrame : 0) |
-                (h.hasForeground && !h.originalForeground ? DXLeaseForeground : 0) |
-                (h.originalBackgrounded ? DXLeaseBackgrounded : 0);
-            unsigned equal=(CGRectEqualToRect(currentFrame,h.writtenFrame) ? DXLeaseFrame : 0) |
-                (h.hasForeground && currentForeground ? DXLeaseForeground : 0) |
-                (!currentBackground ? DXLeaseBackgrounded : 0);
-            unsigned alreadyOriginal=(CGRectEqualToRect(currentFrame,h.originalFrame) ? DXLeaseFrame : 0) |
-                (h.hasForeground && currentForeground==h.originalForeground ? DXLeaseForeground : 0) |
-                (currentBackground==h.originalBackgrounded ? DXLeaseBackgrounded : 0);
-            unsigned mask=DXLeaseRestoreMask(changed,equal,sceneOwned,registryOwned);
-            if (changed & ~(equal | alreadyOriginal))
-                failure=[NSError errorWithDomain:DXSystemBridgeErrorDomain code:DXSystemBridgeErrorOwnership userInfo:@{NSLocalizedDescriptionKey:@"Native owner changed leased settings; conflicting fields were not overwritten"}];
-            if (mask) {
-                DXCheckedIMP(current,@selector(mutableCopy),"@",""); id mutable=[current mutableCopy];
-                DXRequire(mutable && mutable!=current,DXSystemBridgeErrorOwnership,@"Restoration requires an independent mutable copy");
-                if (mask & DXLeaseFrame) DXCheckedIMP(mutable,@selector(setFrame:),"v",@encode(CGRect));
-                if (mask & DXLeaseForeground) DXCheckedIMP(mutable,@selector(setForeground:),"v",@encode(bool));
-                if (mask & DXLeaseBackgrounded) DXCheckedIMP(mutable,@selector(setBackgrounded:),"v",@encode(bool));
-                if (mask & DXLeaseFrame) DXSetFrame(mutable,h.originalFrame);
-                if (mask & DXLeaseForeground) DXSetBool(mutable,@selector(setForeground:),h.originalForeground);
-                if (mask & DXLeaseBackgrounded) DXSetBool(mutable,@selector(setBackgrounded:),h.originalBackgrounded);
-                h.restoreMask=mask; DXWriteSettings(h.scene,mutable);
-            }
-            if (h.activatedScene && (equal & 7u)==(h.hasForeground ? 7u : 5u) &&
-                ![self.frontmostApplicationIdentifier isEqualToString:h.bundleIdentifier] && DXBool(h.scene,@selector(isActive))) {
-                DXVoid1(h.scene,@selector(deactivateWithTransitionContext:),nil); h.deactivatedScene=YES;
-            }
-        }
-    } @catch (NSException *e) { failure=DXCaught(e); }
-    // Every cleanup step is isolated; one rejected private selector cannot skip all remaining cleanup.
-    @try { if (h.presenter) DXVoid(h.presenter,@selector(deactivate)); } @catch (NSException *e) { failure=DXCaught(e); }
-    @try { if (h.presenter) DXVoid(h.presenter,@selector(invalidate)); } @catch (NSException *e) { failure=DXCaught(e); }
-    [h.hostView removeFromSuperview];
-    @try { if (h.observed) { DXVoid1(h.scene,@selector(removeObserver:),h); h.observed=NO; } }
-    @catch (NSException *e) { failure=DXCaught(e); }
-    h.presenter=nil; h.presentationManager=nil;
-    if (registryOwned) [self.handles removeObjectForKey:h.sceneIdentifier];
-    DXBridgeOperation *pending=h.operation; h.operation=nil;
-    if (pending && !pending.finished) [pending finish:[NSError errorWithDomain:DXSystemBridgeErrorDomain code:DXSystemBridgeErrorCancelled userInfo:@{NSLocalizedDescriptionKey:@"Handle released while operation was pending"}]];
-    if (self.focusOperation && self.focusOwner==nil) {
-        DXBridgeOperation *focus=self.focusOperation; self.focusOperation=nil; self.focusPending=NO;
-        [focus finish:[NSError errorWithDomain:DXSystemBridgeErrorDomain code:DXSystemBridgeErrorCancelled userInfo:@{NSLocalizedDescriptionKey:@"Focus lease released"}]];
-    }
-    if (!self.handles.count) { self.contextLost=NO; [self endObserving]; }
-    return failure;
-}
-- (void)releaseHandle:(DXSystemSceneHandle *)h completion:(void (^)(NSError *))completion {
-    __block NSError *cleanupError=nil;
-    __block BOOL ownsCleanup=NO;
-    __block DXBridgeOperation *op;
-    op=[[DXBridgeOperation alloc] initWithTimeout:2 completion:^(NSError *error) {
-        // Expired cleanup still detaches/restores best-effort once main becomes runnable.
-        if (h.owner==self && !h.released && error) cleanupError=[self tearDown:h];
-        NSError *result=error ?: cleanupError;
-        if (ownsCleanup) { h.releaseError=result; h.releaseOperation=nil; self.restorations-=1; }
-        op=nil; completion(result);
-    }];
-    __weak DXBridgeOperation *weakOp=op;
-    [op start:^{
-        DXRequire(h && h.owner==self,DXSystemBridgeErrorStaleHandle,@"Release cannot consume a foreign handle");
-        if (h.releaseOperation && !h.releaseOperation.finished) {
-            DXBridgeOperation *existing=h.releaseOperation;
-            weakOp.progress=^BOOL{ if (!existing.finished) return NO; cleanupError=h.releaseError; return YES; };
-            return;
-        }
-        if (h.released) { cleanupError=h.releaseError; return; }
-        h.releaseOperation=weakOp; ownsCleanup=YES; self.restorations+=1;
-        cleanupError=[self tearDown:h];
-        weakOp.progress=^BOOL{
-            if (!DXSceneStillRegistered(h.scene) || DXObject(h.scene,@selector(clientProcess))!=h.process ||
-                DXPID(h.process,@selector(pid))!=h.processIdentifier || !DXBool(h.process,@selector(isRunning))) return YES;
-            id settings=DXSettings(h.scene);
-            if ((h.restoreMask & DXLeaseFrame) && !CGRectEqualToRect(DXFrame(settings),h.originalFrame)) return NO;
-            if ((h.restoreMask & DXLeaseForeground) && DXBool(settings,@selector(isForeground))!=h.originalForeground) return NO;
-            if ((h.restoreMask & DXLeaseBackgrounded) && DXBool(settings,@selector(isBackgrounded))!=h.originalBackgrounded) return NO;
-            if (h.deactivatedScene && DXBool(h.scene,@selector(isActive))) return NO;
-            if (h.restoreFocusScene && !self.isLocked && DXSceneStillRegistered(h.restoreFocusScene)) {
-                id controller=DXFocusController();
-                if (DXUInt64(controller,@selector(userFocusRequestGeneration))==h.restoreFocusGeneration && DXFocusedScene()!=h.restoreFocusScene) return NO;
-            }
-            return YES;
-        };
-    }];
-}
+#include "DXSceneRecovery.inc"
 
 - (void)postFocusChange {
     if (!self.handles.count) return;
@@ -667,7 +586,7 @@ static void DXWriteSettings(id scene, id settings) {
                       DXSystemBridgeErrorABI,@"FBProcessManagerObserver callback ABI unavailable");
             id manager=DXShared(@"FBProcessManager",@selector(sharedInstance));
             DXCheckedIMP(manager,@selector(removeObserver:),"v","@");
-            class_addProtocol(DXSystemBridge.class,NSProtocolFromString(@"FBProcessManagerObserver"));
+            class_addProtocol(DXSystemBridge.class,DXRuntimeProtocol(@"FBProcessManagerObserver"));
             self.processObserverManager=manager; DXVoid1(manager,@selector(addObserver:),self);
         } @catch (__unused NSException *e) { /* Active watchdog checks exact process object/PID as fallback. */ }
     }
@@ -677,7 +596,7 @@ static void DXWriteSettings(id scene, id settings) {
                       DXProtocolABI(@"SBWorkspaceKeyboardFocusControllerObserver",@selector(keyboardFocusController:didUpdateWindowSceneWithFocusFrom:to:),"v@:@@@",NO),
                       DXSystemBridgeErrorABI,@"Native keyboard-focus observer callback ABI unavailable");
             id controller=DXFocusController();
-            class_addProtocol(DXSystemBridge.class,NSProtocolFromString(@"SBWorkspaceKeyboardFocusControllerObserver"));
+            class_addProtocol(DXSystemBridge.class,DXRuntimeProtocol(@"SBWorkspaceKeyboardFocusControllerObserver"));
             id token=DXObject1(controller,@selector(addKeyboardFocusObserver:),self);
             // Retain even an unknown token once: never repeatedly register or guess its teardown.
             if (token) { self.focusObserverToken=token; self.focusObserverController=controller; }
@@ -710,15 +629,27 @@ static void DXWriteSettings(id scene, id settings) {
     });
     dispatch_resume(timer);
 }
-- (void)endObserving {
-    if (self.watchdog) { dispatch_source_cancel(self.watchdog); self.watchdog=nil; }
+- (NSError *)endObserving {
+    NSError *failure=nil;
     @try {
-        if (self.focusObserverToken) { DXVoid(self.focusObserverToken,@selector(invalidate)); self.focusObserverToken=nil; }
-    } @catch (__unused NSException *e) { /* Retain at most one unknown token; do not guess or re-register. */ }
-    if (!self.focusObserverToken) self.focusObserverController=nil;
+        if (self.watchdog) { dispatch_source_cancel(self.watchdog); self.watchdog=nil; }
+    } @catch (NSException *e) { failure=DXCleanupCaught(e,@"stop-watchdog"); }
     @try {
-        if (self.processObserverManager) { DXVoid1(self.processObserverManager,@selector(removeObserver:),self); self.processObserverManager=nil; }
-    } @catch (__unused NSException *e) { /* Keep the exact removal target for a later bounded retry. */ }
+        if (self.focusObserverToken) {
+            DXCheckpoint(@"release.focus-observer",self.focusObserverToken);
+            DXVoid(self.focusObserverToken,@selector(invalidate)); self.focusObserverToken=nil;
+        }
+    } @catch (NSException *e) { failure=DXErrorWithCleanup(failure,DXCleanupCaught(e,@"remove-focus-observer")); }
+    if (!self.focusObserverToken && !self.focusOwner) self.focusObserverController=nil;
+    @try {
+        if (self.processObserverManager) {
+            DXCheckpoint(@"release.process-observer",self.processObserverManager);
+            DXVoid1(self.processObserverManager,@selector(removeObserver:),self); self.processObserverManager=nil;
+        }
+    } @catch (NSException *e) { failure=DXErrorWithCleanup(failure,DXCleanupCaught(e,@"remove-process-observer")); }
+    // Retain exact failed removal targets (one each), block acquisition until explicit retry.
+    self.observationError=failure;
+    return failure;
 }
 
 - (NSDictionary<NSString *,id> *)capabilityReport {
@@ -772,7 +703,10 @@ static void DXWriteSettings(id scene, id settings) {
     return @{@"adapter":@"native UIKit scene presenter + FrontBoard settings + workspace focus (source candidate)",
              @"minimumDeployment":@"15.0",@"maximumOSGate":@NO,@"runtimeVerified":@NO,
              @"abiCandidatesReady":@(matches),@"abiChecks":checks,@"activeLeases":@(self.handles.count),
-             @"stagingLeaseLimit":@3,@"acknowledgedInteractiveHandles":@(interactive),@"restorationsPending":@(self.restorations),
+             @"stagingLeaseLimit":@3,@"recoveryLeases":@(self.recovery.count),
+             @"totalOwnedResources":@(self.handles.count+self.recovery.count),
+             @"observationRecoveryPending":@(self.observationError!=nil),
+             @"acknowledgedInteractiveHandles":@(interactive),@"restorationsPending":@(self.restorations),
              @"eventDelivery":@"Requires visible window-server-hit-testing context, matching native live host/layers and foreground process; touch receipt is NOT proven by this report",
              @"keyboardFocusObserverRegistered":@(self.focusObserverToken!=nil),@"processObserverRegistered":@(self.processObserverManager!=nil),
              @"sceneInvalidationObserver":@"Per-scene addObserver with runtime protocol encoding check; native delegate is never replaced",

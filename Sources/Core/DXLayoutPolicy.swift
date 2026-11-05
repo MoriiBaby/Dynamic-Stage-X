@@ -15,6 +15,21 @@ public struct DXLayout: Equatable {
 }
 
 public enum DXLayoutPolicy {
+    /// Product layout reserves a real control band; the basic split primitive remains
+    /// usable without chrome in other clients/tests. Controls never overlap App content.
+    public static func stage(bounds: DXRect, safeArea: DXInsets, ratio: Double,
+                             gap: Double, margin: Double, radius: Double) -> DXLayout? {
+        guard gap.isFinite, gap >= 0 else { return nil }
+        return split(bounds: bounds, safeArea: safeArea, ratio: ratio,
+                     gap: max(56, gap), margin: margin, radius: radius)
+    }
+
+    /// Input focus uses the region below a distinct control band above the active pane.
+    public static func inputInsets(_ safeArea: DXInsets) -> DXInsets {
+        DXInsets(top: safeArea.top + 56, left: safeArea.left,
+                 bottom: safeArea.bottom, right: safeArea.right)
+    }
+
     public static func split(
         bounds: DXRect, safeArea: DXInsets, ratio: Double,
         gap: Double, margin: Double, radius: Double

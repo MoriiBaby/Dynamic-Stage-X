@@ -78,7 +78,7 @@ class SourceContracts(unittest.TestCase):
         if workflows.exists():
             self.assertEqual({p.name for p in workflows.iterdir()}, {'build-roothide.yml'})
             workflow = (workflows / 'build-roothide.yml').read_text()
-            self.assertIn('branches: [fix/trigger-alpha3]', workflow)
+            self.assertIn('branches: [fix/scene-alpha4]', workflow)
             self.assertIn('contents: read', workflow)
             self.assertNotRegex(workflow, r'(?m)^\s+run:.*(?:make install|respring|ssh )')
 
@@ -93,7 +93,11 @@ class SourceContracts(unittest.TestCase):
         self.assertIn('pending', self.text('Sources/Coordinator/DXSceneCommandQueue.swift'))
         self.assertIn('DXKeyboardPolicy.focusedFrame', source)
         self.assertIn('bridge.release(handle)', source)
-        self.assertIn('window.isUserInteractionEnabled = false', source)
+        self.assertIn('window.isUserInteractionEnabled = true', source)
+        self.assertNotIn('window.isUserInteractionEnabled = false', source)
+        self.assertIn('bridge.releaseAll', source)
+        self.assertIn('setPreparing(true', source)
+        self.assertIn('DXFailurePolicy.description(primary:', source)
 
     def test_privacy_and_defaults(self):
         self.assertIn('var enabled = false', self.text('Sources/Preferences/DXPreferences.swift'))

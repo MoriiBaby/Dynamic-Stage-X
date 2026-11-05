@@ -13,7 +13,7 @@ final class DXFailureNotice {
         let controller = UIViewController()
         controller.view.backgroundColor = .clear
         let label = UILabel()
-        label.text = "Dynamic Stage X\n" + String(text.prefix(240))
+        label.text = "Dynamic Stage X\n" + String(text.prefix(640))
         label.numberOfLines = 0
         label.textAlignment = .center
         label.font = .preferredFont(forTextStyle: .footnote)
@@ -37,7 +37,7 @@ final class DXFailureNotice {
         UIAccessibility.post(notification: .announcement, argument: text)
         let work = DispatchWorkItem { [weak self] in self?.dismiss() }
         dismissal = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + 4, execute: work)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 8, execute: work)
     }
 
     func dismiss() {

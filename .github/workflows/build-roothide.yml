@@ -2,7 +2,7 @@ name: RootHide Mac test build
 
 on:
   push:
-    branches: [fix/trigger-alpha3]
+    branches: [fix/scene-alpha4]
   workflow_dispatch:
 
 permissions:
@@ -56,6 +56,8 @@ jobs:
           python3 Scripts/check_source.py 2>&1 | tee build-evidence/source-contracts.txt
           python3 Tests/Core/verify_source_contract.py 2>&1 | tee build-evidence/core-contracts.txt
           python3 Tests/Presentation/verify_source_contract.py 2>&1 | tee build-evidence/ui-contracts.txt
+          python3 Tests/Presentation/verify_alpha4_source_contract.py 2>&1 | tee build-evidence/preparation-ui-contracts.txt
+          python3 ci/check_alpha4_source.py 2>&1 | tee build-evidence/alpha4-scope-contracts.txt
           python3 Tests/Preferences/check_preferences_contract.py 2>&1 | tee build-evidence/preferences-contracts.txt
           sh Tests/Bridge/run-local.sh 2>&1 | tee build-evidence/bridge-C.txt
           swift test 2>&1 | tee build-evidence/swift-XCTest.txt
@@ -64,11 +66,16 @@ jobs:
         run: |
           set -euo pipefail
           python3 ci/test_preferences_simulator.py 2>&1 | tee build-evidence/preferences-simulator.txt
-      - name: Real coordinate swipe regression on simulator
+      - name: Production scene cleanup fault regression on simulator
         shell: bash
         run: |
           set -euo pipefail
-          python3 ci/test_trigger_simulator.py --runtime 18.5 --device-type 'iPhone 16 Pro' 2>&1 | tee build-evidence/trigger-simulator.txt
+          python3 ci/test_scene_bridge.py 2>&1 | tee build-evidence/scene-bridge-simulator.txt
+      - name: Preparation and toolbar regression on simulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 ci/test_stage_simulator.py 2>&1 | tee build-evidence/stage-simulator.txt
       - name: Compile sign and package native RootHide
         shell: bash
         run: |
@@ -82,7 +89,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: Dynamic-Stage-X-roothide-alpha3-${{ github.run_id }}
+          name: Dynamic-Stage-X-roothide-alpha4-${{ github.run_id }}
           path: |
             packages/*.deb
             build-evidence/

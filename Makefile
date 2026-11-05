@@ -2,7 +2,7 @@
 ARCHS = arm64 arm64e
 TARGET = iphone:clang:latest:15.0
 INSTALL_TARGET_PROCESSES = SpringBoard
-PACKAGE_VERSION = 0.1.0~alpha3
+PACKAGE_VERSION = 0.1.0~alpha4
 
 # Select a native scheme explicitly. Do not convert an already-built DEB.
 #   make package THEOS_PACKAGE_SCHEME=roothide
@@ -14,7 +14,7 @@ include $(THEOS)/makefiles/common.mk
 TWEAK_NAME = DynamicStageX
 DynamicStageX_FILES = $(sort $(wildcard Sources/*/*.swift) $(wildcard Sources/*/*.m) $(wildcard Sources/*/*.c))
 DynamicStageX_CFLAGS = -Wall -Wextra
-DynamicStageX_OBJCFLAGS = -fobjc-arc
+DynamicStageX_OBJCFLAGS = -fobjc-arc -fobjc-arc-exceptions
 DynamicStageX_SWIFTFLAGS = -swift-version 5 -module-name DynamicStageX
 DynamicStageX_FRAMEWORKS = UIKit Foundation CoreFoundation CoreGraphics QuartzCore
 DynamicStageX_LIBRARIES = substrate

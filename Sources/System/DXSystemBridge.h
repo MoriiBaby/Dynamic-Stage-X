@@ -5,6 +5,14 @@
 NS_ASSUME_NONNULL_BEGIN
 
 FOUNDATION_EXPORT NSErrorDomain const DXSystemBridgeErrorDomain;
+/// Bounded diagnostics only: operation/stage/class/selector/exception-name identifiers, never exception payloads.
+FOUNDATION_EXPORT NSString * const DXSceneOperationKey;
+FOUNDATION_EXPORT NSString * const DXSceneStageKey;
+FOUNDATION_EXPORT NSString * const DXSceneClassKey;
+FOUNDATION_EXPORT NSString * const DXSceneSelectorKey;
+FOUNDATION_EXPORT NSString * const DXSceneExceptionNameKey;
+FOUNDATION_EXPORT NSString * const DXSceneReadinessKey;
+FOUNDATION_EXPORT NSString * const DXSceneCleanupErrorsKey;
 /// Main queue, object is the invalidated DXSystemSceneHandle (or nil for context loss).
 FOUNDATION_EXPORT NSNotificationName const DXSystemSceneInvalidatedNotification;
 /// Main queue; authoritative focus identity changed. No keyboard text/frame is included.
@@ -41,6 +49,9 @@ typedef NS_ERROR_ENUM(DXSystemBridgeErrorDomain, DXSystemBridgeError) {
 @property (nonatomic, readonly) UIView *hostView;
 /// Main-thread query: checks scene identity, process, presenter and registry ownership again.
 @property (nonatomic, readonly, getter=isValid) BOOL valid;
+/// Main-only snapshot. Keys settings/scene/process/presenter/layers/events each contain ready/reason.
+/// Before apply all are not-yet-evaluated. Off-main returns an empty dictionary.
+@property (nonatomic, readonly, copy) NSDictionary<NSString *, id> *readiness;
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 @end
@@ -72,6 +83,11 @@ typedef NS_ERROR_ENUM(DXSystemBridgeErrorDomain, DXSystemBridgeError) {
 /// Idempotent for already released own handles. Restores only still-owned changed fields.
 - (void)releaseHandle:(DXSystemSceneHandle *)handle completion:(void (^)(NSError * _Nullable))completion
     NS_SWIFT_NAME(release(_:completion:));
+/// Cancels queued/pending own acquisitions by bridge epoch and awaits all own cleanup.
+/// Failed physical cleanup stays bounded outside the active registry; retry this API before re-entry.
+/// Does not destroy native scenes/processes or cancel an already submitted OS activation request.
+- (void)releaseAllScenesWithCompletion:(void (^)(NSError * _Nullable))completion
+    NS_SWIFT_NAME(releaseAll(completion:));
 /// Refuses while any own scene lease is active; release both handles before full-screen fallback.
 - (void)activateNativeApplication:(NSString *)identifier completion:(void (^)(NSError * _Nullable))completion
     NS_SWIFT_NAME(activateNative(bundleIdentifier:completion:));

@@ -36,6 +36,9 @@ final class DXCoordinator {
     private var geometryRevision: UInt64 = 0
     private var dismissCompletions: [() -> Void] = []
     private var lastCleanupError: Error?
+    private var originalFailure: Error?
+    private var preparationTimer: Timer?
+    private var recovering = false
     private let notice = DXFailureNotice()
     private let sceneCommands = DXSceneCommandQueue()
     private var lastTriggerNoticeAt: TimeInterval = -10
@@ -71,7 +74,7 @@ final class DXCoordinator {
         dispatchPrecondition(condition: .onQueue(.main))
         preferences = DXPreferences.load()
         if !preferences.enabled { dismiss() }
-        if stage != nil && !dismissing { updateLayout(animated: true) }
+        if stage != nil && !dismissing && !busy { updateLayout(animated: true) }
         rebuildTrigger()
     }
 
@@ -89,7 +92,7 @@ final class DXCoordinator {
             dismiss()
             return
         }
-        if overlay != nil { updateLayout(animated: false) }
+        if overlay != nil && !busy && machine.phase != .collapsed { updateLayout(animated: false) }
         rebuildTrigger()
     }
 
@@ -123,6 +126,11 @@ final class DXCoordinator {
     }
 
     private func triggered() {
+        guard !recovering else { triggerNotice("正在确认上次场景已恢复，请稍后。"); return }
+        if lastCleanupError != nil {
+            retryRecovery()
+            return
+        }
         if machine.phase == .collapsed {
             guard !busy, !dismissing, top?.isValid == true, bottom?.isValid == true else {
                 triggerNotice("收起的窗口会话已失效，请关闭后重新开启分屏。")
@@ -176,50 +184,59 @@ final class DXCoordinator {
     }
 
     private func beginSession(topIdentifier identifier: String, desiredBottom: String?, in scene: UIWindowScene) {
-        guard token != nil else { return }
+        guard token != nil, !dismissing else { return }
         sceneCommands.resume()
         generation = UUID()
         operation = UUID()
+        originalFailure = nil
         let expected = generation
         nativeTop = identifier
         activeSlot = .top
         busy = true
+        let controller = DXStageViewController()
+        controller.onClose = { [weak self] in self?.dismiss() }
+        controller.onCollapse = { [weak self] in self?.collapse() }
+        controller.onChooseApplication = { [weak self] in self?.showPicker() }
+        controller.onSwitchInput = { [weak self] in self?.switchInput() }
+        controller.onFocus = { [weak self] slot in self?.requestFocus(slot) }
+        controller.loadViewIfNeeded()
+        controller.view.backgroundColor = .clear
+        controller.setPreparing(true, message: "正在准备应用场景，可随时取消。")
+        let window = DXOverlayWindow(windowScene: scene)
+        window.frame = scene.screen.bounds
+        window.windowLevel = .statusBar + 1
+        window.rootViewController = controller
+        stage = controller
+        overlay = window
+        // Remote pane hits are disabled, not the window or its cancel control.
+        window.isUserInteractionEnabled = true
+        window.isHidden = false
+        rebuildTrigger()
+        startPreparationProgress(expected: expected)
         bridge.acquireScene(bundleIdentifier: identifier) { [weak self] handle, error in
-            guard let self = self else { return }
+            guard let self = self else {
+                if let handle = handle { DXSystemBridge.shared().release(handle) { _ in } }
+                return
+            }
             guard self.isCurrent(expected) else { if let handle = handle { self.releaseDetached(handle) }; return }
             guard let handle = handle, error == nil, handle.isValid else {
-                self.fail(error?.localizedDescription ?? "无法取得当前应用的真实场景")
+                if let handle = handle { self.releaseDetached(handle) }
+                self.fail(error ?? self.localError("当前应用场景在准备阶段失效。"))
                 return
             }
             self.top = handle
-            let controller = DXStageViewController()
-            controller.onClose = { [weak self] in self?.dismiss() }
-            controller.onCollapse = { [weak self] in self?.collapse() }
-            controller.onChooseApplication = { [weak self] in self?.showPicker() }
-            controller.onSwitchInput = { [weak self] in self?.switchInput() }
-            controller.onFocus = { [weak self] slot in self?.requestFocus(slot) }
-            controller.loadViewIfNeeded()
-            controller.view.backgroundColor = .black
             controller.topPane.install(handle.hostView)
-            let window = DXOverlayWindow(windowScene: scene)
-            window.frame = scene.screen.bounds
-            window.windowLevel = .statusBar + 1
-            window.rootViewController = controller
-            self.stage = controller
-            self.overlay = window
-            self.busy = false
-            // The system's native event binder requires a visible UIWindow. Until ready,
-            // the window refuses user interaction until the real presenter acknowledges readiness.
-            window.isUserInteractionEnabled = false
-            window.isHidden = false
             if let desiredBottom = desiredBottom {
                 guard self.transition({ $0.prepare(token: $1) }) else { self.fail("无法建立双窗准备状态"); return }
-                self.busy = true
                 self.bridge.acquireScene(bundleIdentifier: desiredBottom) { [weak self] lower, lowerError in
-                    guard let self = self else { return }
+                    guard let self = self else {
+                        if let lower = lower { DXSystemBridge.shared().release(lower) { _ in } }
+                        return
+                    }
                     guard self.isCurrent(expected) else { if let lower = lower { self.releaseDetached(lower) }; return }
                     guard let lower = lower, lowerError == nil, lower.isValid else {
-                        self.fail(lowerError?.localizedDescription ?? "冷启动后的应用场景不可用"); return
+                        if let lower = lower { self.releaseDetached(lower) }
+                        self.fail(lowerError ?? self.localError("下方应用场景在准备阶段失效。")); return
                     }
                     self.bottom = lower
                     controller.bottomPane.install(lower.hostView)
@@ -235,6 +252,9 @@ final class DXCoordinator {
         updateLayout(animated: false) { [weak self] success in
             guard let self = self, self.isCurrent(expected), success else { return }
             self.busy = false
+            self.stopPreparationProgress()
+            self.stage?.setPreparing(false, message: "")
+            self.stage?.view.backgroundColor = .black
             window.isUserInteractionEnabled = true
             if paired {
                 guard self.transition({ $0.splitReady(token: $1) }) else { self.fail("双窗准备结果已过期"); return }
@@ -245,6 +265,47 @@ final class DXCoordinator {
                 self.showPicker()
             }
             self.rebuildTrigger()
+        }
+    }
+
+    private func localError(_ message: String) -> NSError {
+        NSError(domain: "com.tsangbaby.dynamicstagex.coordinator", code: 1,
+                userInfo: [NSLocalizedDescriptionKey: message])
+    }
+
+    private func startPreparationProgress(expected: UUID) {
+        stopPreparationProgress()
+        let timer = Timer(timeInterval: 0.25, repeats: true) { [weak self] _ in
+            guard let self = self, self.isCurrent(expected), self.busy else { return }
+            let handles = [self.top, self.bottom].compactMap { $0 }
+            let pending = handles.flatMap { ($0.readiness["pending"] as? [String]) ?? [] }
+            let text = pending.isEmpty ? "正在准备应用场景，可随时取消。" :
+                "等待系统确认：" + pending.prefix(4).joined(separator: "、")
+            self.stage?.setPreparationMessage(text)
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        preparationTimer = timer
+    }
+
+    private func stopPreparationProgress() {
+        preparationTimer?.invalidate()
+        preparationTimer = nil
+    }
+
+    private func retryRecovery() {
+        guard !recovering, !dismissing else { return }
+        recovering = true
+        triggerNotice("正在重新确认上次场景的恢复结果。")
+        bridge.releaseAll { [weak self] error in
+            guard let self = self else { return }
+            self.recovering = false
+            self.lastCleanupError = error
+            if let error = error {
+                self.triggerNotice(DXFailurePolicy.description(primary: self.originalFailure, cleanup: error) ?? error.localizedDescription)
+            } else {
+                self.originalFailure = nil
+                self.triggerNotice("已完成恢复，请重新上滑开始分屏。")
+            }
         }
     }
 
@@ -274,33 +335,48 @@ final class DXCoordinator {
         // Replacement is transactional: keep old lease and content until the new one is ready.
         if machine.phase == .selecting && !transition({ $0.prepare(token: $1) }) { return }
         busy = true
+        stage?.setPreparing(true, message: "正在准备下方应用，可取消。")
+        startPreparationProgress(expected: generation)
         operation = UUID()
         let currentOperation = operation
         let expected = generation
         bridge.acquireScene(bundleIdentifier: identifier) { [weak self] handle, error in
-            guard let self = self else { return }
+            guard let self = self else {
+                if let handle = handle { DXSystemBridge.shared().release(handle) { _ in } }
+                return
+            }
             guard self.isCurrent(expected), self.operation == currentOperation else {
                 if let handle = handle { self.releaseDetached(handle) }
                 return
             }
             guard let handle = handle, error == nil, handle.isValid, let layout = self.layout else {
+                if let handle = handle { self.releaseDetached(handle) }
                 self.busy = false
+                self.stopPreparationProgress()
+                self.stage?.setPreparing(false, message: "")
                 let nsError = error as NSError?
                 if allowColdLaunch, nsError?.domain == "com.tsangbaby.dynamicstagex.system",
                    nsError?.code == 4, let original = self.nativeTop {
                     self.launchColdApplication(identifier, preservingTop: original)
-                } else if self.bottom == nil { self.fail(error?.localizedDescription ?? "应用场景准备失败") }
+                } else if self.bottom == nil { self.fail(error ?? self.localError("应用场景准备失败。")) }
                 else { self.stage?.showMessage(error?.localizedDescription ?? "无法更换应用，原窗口已保留") }
                 return
             }
-            guard let stage = self.stage else { self.releaseDetached(handle); return }
+            guard let stage = self.stage else {
+                self.releaseDetached(handle)
+                self.fail("分屏容器已退出，已回收新应用场景。")
+                return
+            }
             // The native presenter requires a UIWindow-backed hierarchy before event binding.
             // Stage new real content behind the picker without removing the current bottom pane.
             let staging = UIView(frame: layout.bottom.cgRect)
             staging.clipsToBounds = true
             staging.isUserInteractionEnabled = false
-            staging.alpha = 0
-            stage.view.addSubview(staging)
+            staging.layer.cornerRadius = CGFloat(self.preferences.cornerRadius)
+            staging.layer.cornerCurve = .continuous
+            // A zero-alpha staging ancestor can prevent native hosting/visibility
+            // acknowledgement. Keep the real view visible behind the old pane instead.
+            stage.view.insertSubview(staging, belowSubview: stage.bottomPane)
             staging.addSubview(handle.hostView)
             handle.hostView.frame = staging.bounds
             self.apply(frame: layout.bottom.cgRect, to: handle) { [weak self] frameError in
@@ -310,8 +386,11 @@ final class DXCoordinator {
                 guard frameError == nil else {
                     self.releaseDetached(handle)
                     self.busy = false
-                    if self.bottom == nil { self.fail(frameError!.localizedDescription) }
-                    else { self.stage?.showMessage(frameError!.localizedDescription) }
+                    self.stopPreparationProgress()
+                    self.stage?.setPreparing(false, message: "")
+                    if self.bottom == nil { self.fail(frameError!) }
+                    else if self.bottom?.isValid == true { self.stage?.showMessage(frameError!.localizedDescription) }
+                    else { self.fail(frameError!) }
                     return
                 }
                 let previous = self.bottom
@@ -326,11 +405,17 @@ final class DXCoordinator {
                     self.busy = false
                     self.updateLayout(animated: true) { [weak self] ready in
                         guard let self = self, ready, self.isCurrent(expected) else { return }
+                        self.stopPreparationProgress()
+                        self.stage?.setPreparing(false, message: "")
                         self.requestFocus(.bottom)
                     }
                 }
                 if let previous = previous {
-                    self.bridge.release(previous) { _ in finishReplacement() }
+                    self.bridge.release(previous) { [weak self] error in
+                        guard let self = self, self.isCurrent(expected) else { return }
+                        if let error = error { self.fail(error) }
+                        else { finishReplacement() }
+                    }
                 } else {
                     finishReplacement()
                 }
@@ -378,7 +463,7 @@ final class DXCoordinator {
               window.bounds.width > 0, window.bounds.height > 0 else { completion?(false); return }
         window.layoutIfNeeded()
         let insets = window.safeAreaInsets
-        guard let next = DXLayoutPolicy.split(bounds: DXRect(window.bounds), safeArea: DXInsets(insets),
+        guard let next = DXLayoutPolicy.stage(bounds: DXRect(window.bounds), safeArea: DXInsets(insets),
                 ratio: preferences.ratio, gap: preferences.gap, margin: preferences.margin,
                 radius: preferences.cornerRadius) else { fail("当前显示区域不足以建立上下分屏"); completion?(false); return }
         let firstLayout = layout == nil
@@ -395,7 +480,7 @@ final class DXCoordinator {
         if let top = top { requests.append((top, next.top.cgRect)) }
         if let bottom = bottom { requests.append((bottom, next.bottom.cgRect)) }
         if let slot = focusedSlot, let keyboardFrame = keyboardFrame,
-           let focused = DXKeyboardPolicy.focusedFrame(bounds: DXRect(window.bounds), safeArea: DXInsets(insets),
+           let focused = DXKeyboardPolicy.focusedFrame(bounds: DXRect(window.bounds), safeArea: DXLayoutPolicy.inputInsets(DXInsets(insets)),
                    keyboard: DXRect(keyboardFrame), minimumHeight: 180)?.cgRect,
            let active = handle(for: slot) {
             requests = [(active, focused)]
@@ -413,12 +498,12 @@ final class DXCoordinator {
             guard let self = self, let stage = stage, self.isCurrent(expected), self.geometrySerial == revision else {
                 completion?(false); return
             }
-            if let error = firstError { self.fail(error.localizedDescription); completion?(false); return }
+            if let error = firstError { self.fail(error); completion?(false); return }
             stage.setFrames(top: next.top.cgRect, bottom: next.bottom.cgRect,
                 topRadius: CGFloat(next.topRadius), bottomRadius: CGFloat(next.bottomRadius),
                 animated: animated, duration: 0.3, curve: .easeInOut)
             if let slot = self.focusedSlot, let frame = self.keyboardFrame,
-               let focused = DXKeyboardPolicy.focusedFrame(bounds: DXRect(window.bounds), safeArea: DXInsets(insets),
+               let focused = DXKeyboardPolicy.focusedFrame(bounds: DXRect(window.bounds), safeArea: DXLayoutPolicy.inputInsets(DXInsets(insets)),
                        keyboard: DXRect(frame), minimumHeight: 180) {
                 stage.setInputFocused(slot, frame: focused.cgRect, animated: animated, duration: 0.25, curve: .easeInOut)
             }
@@ -434,7 +519,7 @@ final class DXCoordinator {
         sceneCommands.focus(handle, bridge: bridge) { [weak self] error in
             guard let self = self, self.isCurrent(expected), self.focusOperation == request else { return }
             if let error = error {
-                if !handle.isValid { self.fail("应用输入会话已失效：" + error.localizedDescription) }
+                if !handle.isValid { self.fail(error) }
                 else { self.stage?.showMessage("无法确认应用输入焦点：\(error.localizedDescription)") }
                 return
             }
@@ -451,8 +536,9 @@ final class DXCoordinator {
     }
 
     private func keyboardChanged(_ change: DXKeyboardObserver.Change) {
-        guard change.sceneGeneration == generation, !dismissing,
+        guard !dismissing, machine.phase == .split || machine.phase == .inputFocused,
               token != nil, let window = overlay else { return }
+        guard change.sceneGeneration == generation else { return }
         guard change.visible else { leaveInputLayout(animated: true); return }
         let candidates: [(DXSlot, DXSystemSceneHandle?)] = [(.top, top), (.bottom, bottom)]
         let matching = candidates.filter { $0.1?.processIdentifier == change.focusPID && $0.1?.isValid == true }
@@ -466,7 +552,7 @@ final class DXCoordinator {
             return
         }
         guard let available = DXKeyboardPolicy.focusedFrame(bounds: DXRect(window.bounds),
-            safeArea: DXInsets(window.safeAreaInsets), keyboard: DXRect(frame), minimumHeight: 180) else {
+            safeArea: DXLayoutPolicy.inputInsets(DXInsets(window.safeAreaInsets)), keyboard: DXRect(frame), minimumHeight: 180) else {
             nativeInputFallback(handle)
             return
         }
@@ -524,7 +610,7 @@ final class DXCoordinator {
         let expected = generation
         apply(frame: window.bounds, to: top) { [weak self] error in
             guard let self = self, self.isCurrent(expected), self.machine.phase == .collapsed else { return }
-            guard error == nil else { self.fail(error!.localizedDescription); return }
+            guard error == nil else { self.fail(error!); return }
             self.stage?.setInputFocused(.top, frame: window.bounds, animated: true, duration: 0.3, curve: .easeInOut)
             self.stage?.topPane.radius = 0
             self.requestFocus(.top)
@@ -550,14 +636,18 @@ final class DXCoordinator {
     }
 
     private func releaseDetached(_ handle: DXSystemSceneHandle) {
-        bridge.release(handle) { _ in }
+        bridge.release(handle) { [weak self] error in
+            guard let self = self, let error = error else { return }
+            if self.lastCleanupError == nil { self.lastCleanupError = error }
+        }
     }
 
-    private func fail(_ message: String) {
-        // Keep the reason visible only when a valid UI already exists. Never attach a fake
-        // placeholder scene to make a failed capability appear to have succeeded.
-        stage?.showMessage(message)
-        if let scene = displayScene(), !bridge.isLocked() { notice.show(message, in: scene) }
+    private func fail(_ message: String) { fail(localError(message)) }
+
+    private func fail(_ error: Error) {
+        // Hold the first cause until the release-all barrier reports its separate result.
+        // A cleanup error must never replace the original acknowledgement failure.
+        if originalFailure == nil { originalFailure = error }
         dismiss()
     }
 
@@ -565,30 +655,23 @@ final class DXCoordinator {
         dispatchPrecondition(condition: .onQueue(.main))
         if let completion = completion { dismissCompletions.append(completion) }
         guard !dismissing else { return }
-        guard token != nil || overlay != nil || top != nil || bottom != nil else {
-            let callbacks = dismissCompletions
-            dismissCompletions.removeAll()
-            callbacks.forEach { $0() }
-            return
-        }
         dismissing = true
-        lastCleanupError = nil
         busy = false
         generation = UUID()
         operation = UUID()
         focusOperation = UUID()
         geometrySerial &+= 1
         sceneCommands.cancelPending()
+        stopPreparationProgress()
         collapseWork?.cancel()
         collapseWork = nil
         _ = transition { $0.beginDismiss(token: $1) }
         let oldToken = token
-        let leases = [bottom, top].compactMap { $0 }
         let oldStage = stage
         let oldWindow = overlay
-        stage?.dismissPicker()
-        stage?.topPane.detach()
-        stage?.bottomPane.detach()
+        stage?.setPreparing(true, message: "正在恢复系统场景…")
+        // Bridge owns host detachment. Calling remote removeFromSuperview from Swift
+        // here would let an ObjC exception bypass the exception-safe cleanup boundary.
         overlay?.isHidden = true
         top = nil
         bottom = nil
@@ -596,18 +679,11 @@ final class DXCoordinator {
         keyboardFrame = nil
         layout = nil
         trigger?.isHidden = true
-        let group = DispatchGroup()
-        for handle in leases {
-            group.enter()
-            bridge.release(handle) { [weak self] error in
-                if self?.lastCleanupError == nil { self?.lastCleanupError = error }
-                group.leave()
-            }
-        }
-        group.notify(queue: .main) { [weak self] in
+        bridge.releaseAll { [weak self] error in
             guard let self = self else { return }
+            self.lastCleanupError = error
             oldWindow?.rootViewController = nil
-            _ = oldStage // Retain the view tree only through the release barrier.
+            _ = oldStage // Keep only this presentation tree alive through the barrier.
             self.overlay = nil
             self.stage = nil
             if let oldToken = oldToken { _ = self.machine.finishDismiss(token: oldToken) }
@@ -615,13 +691,13 @@ final class DXCoordinator {
             self.nativeTop = nil
             self.dismissing = false
             self.rebuildTrigger()
-            if let error = self.lastCleanupError, let scene = self.displayScene(), !self.bridge.isLocked() {
-                self.notice.show("恢复系统场景时遇到问题：" + error.localizedDescription, in: scene)
+            if let text = DXFailurePolicy.description(primary: self.originalFailure, cleanup: error),
+               let scene = self.displayScene(), !self.bridge.isLocked() {
+                self.notice.show(text, in: scene)
             }
+            if error == nil { self.originalFailure = nil }
             let callbacks = self.dismissCompletions
             self.dismissCompletions.removeAll()
-            // Explicit native activation is reserved for the input fallback below. Releasing
-            // the top lease restores its system geometry; a generic close never steals focus.
             callbacks.forEach { $0() }
         }
     }

@@ -10,6 +10,7 @@ final class DXStageViewController: UIViewController {
     var onFocus: ((DXSlot) -> Void)?
 
     internal var hasApplicationPicker: Bool { return picker != nil }
+    internal private(set) var isPreparing = false
     internal private(set) var inputFocusedSlot: DXSlot?
     private var inputFrame: CGRect?
     private struct SplitLayout {
@@ -18,6 +19,7 @@ final class DXStageViewController: UIViewController {
     }
     private var splitLayout: SplitLayout?
     private let chrome = DXStageChrome(frame: .zero)
+    private let preparationView = DXStagePreparationView(frame: .zero)
     private let messageLabel = UILabel()
     private var picker: DXApplicationPickerViewController?
     private var pickerGeneration: UInt64 = 0
@@ -61,12 +63,59 @@ final class DXStageViewController: UIViewController {
         messageLabel.isHidden = true
         messageLabel.accessibilityIdentifier = "DX.message"
         view.addSubview(messageLabel)
+        preparationView.cancelButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
+        view.addSubview(preparationView)
     }
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        if layoutAnimator == nil { chrome.frame = targetChromeFrame() }
+        if layoutAnimator == nil { layoutChrome() }
+        layoutPreparation()
         layoutMessage()
+    }
+
+    /// Parent keeps the window/context enabled and calls false ONLY after the
+    /// real scene + event acknowledgement, never merely after mounting pixels.
+    func setPreparing(_ preparing: Bool, message: String) {
+        precondition(Thread.isMainThread)
+        loadViewIfNeeded()
+        isPreparing = preparing
+        if preparing {
+            dismissPicker()
+            topPane.cancelPendingInteraction()
+            bottomPane.cancelPendingInteraction()
+            messageWork?.cancel()
+            messageGeneration &+= 1
+            messageLabel.isHidden = true
+        }
+        preparationView.setPreparing(preparing, message: preparationText(message))
+        updateInteractionAvailability()
+        if layoutAnimator == nil { layoutChrome() }
+        layoutPreparation()
+        if preparing && canDeliverIntent {
+            UIAccessibility.post(notification: .announcement, argument: preparationView.messageLabel.text)
+        }
+    }
+
+    func setPreparationMessage(_ message: String) {
+        precondition(Thread.isMainThread)
+        guard isPreparing else { return }
+        preparationView.setPreparing(true, message: preparationText(message))
+        layoutPreparation()
+    }
+
+    private func preparationText(_ message: String) -> String {
+        return message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?
+            "正在准备分屏，等待系统场景和交互确认…" : message
+    }
+
+    private func updateInteractionAvailability() {
+        let available = !isPreparing && splitLayout != nil
+        topPane.acceptsHostedTouches = available && inputFocusedSlot != .bottom
+        bottomPane.acceptsHostedTouches = available && inputFocusedSlot != .top
+        topPane.accessibilityElementsHidden = !topPane.acceptsHostedTouches
+        bottomPane.accessibilityElementsHidden = !bottomPane.acceptsHostedTouches
+        chrome.setPreparing(isPreparing, inputFocused: inputFocusedSlot != nil)
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -131,12 +180,12 @@ final class DXStageViewController: UIViewController {
         bottomPane.isHidden = false
         // Ignore new hits to the outgoing pane without cancelling an app's
         // already-delivered touches by toggling isUserInteractionEnabled.
-        topPane.acceptsHostedTouches = topVisible
-        bottomPane.acceptsHostedTouches = bottomVisible
-        topPane.accessibilityElementsHidden = !topVisible
-        bottomPane.accessibilityElementsHidden = !bottomVisible
-        chrome.switchInputButton.isEnabled = inputFocusedSlot != nil
+        updateInteractionAvailability()
         let seconds = DXUIGeometry.duration(duration, animated: animated && view.window != nil)
+        // A moving gap is not a reservation. Keep chrome out of app content even
+        // during interrupted focus/split transitions; reveal only at the target.
+        chrome.isHidden = seconds > 0
+        chrome.accessibilityElementsHidden = seconds > 0
         let targetChrome = targetChromeFrame()
         let generation = animationGeneration
         let changes = { [weak self] in
@@ -151,6 +200,7 @@ final class DXStageViewController: UIViewController {
             UIView.performWithoutAnimation(changes)
             topPane.isHidden = !topVisible
             bottomPane.isHidden = !bottomVisible
+            layoutChrome()
         } else {
             let animator = UIViewPropertyAnimator(duration: seconds, curve: curve, animations: changes)
             animator.addCompletion { [weak self] _ in
@@ -158,11 +208,13 @@ final class DXStageViewController: UIViewController {
                 self.layoutAnimator = nil
                 self.topPane.isHidden = !topVisible
                 self.bottomPane.isHidden = !bottomVisible
-                self.chrome.frame = self.targetChromeFrame()
+                self.layoutChrome()
+                self.layoutPreparation()
             }
             layoutAnimator = animator
             animator.startAnimation()
         }
+        layoutPreparation()
     }
 
     @discardableResult
@@ -182,23 +234,43 @@ final class DXStageViewController: UIViewController {
     }
 
     private func targetChromeFrame() -> CGRect {
+        guard let split = splitLayout else { return .zero }
+        return DXStageChromeLayout.frame(safe: view.bounds.inset(by: view.safeAreaInsets),
+                                        top: split.top, bottom: split.bottom,
+                                        focused: inputFocusedSlot == nil ? nil : inputFrame)
+    }
+
+    private func layoutChrome() {
+        chrome.frame = targetChromeFrame()
+        let unavailable = chrome.frame.isEmpty || layoutAnimator != nil
+        chrome.isHidden = unavailable
+        chrome.isUserInteractionEnabled = !unavailable
+        chrome.accessibilityElementsHidden = unavailable
+    }
+
+    private func layoutPreparation() {
+        guard isPreparing else { return }
         let safe = view.bounds.inset(by: view.safeAreaInsets)
-        let width = min(224, max(0, safe.width - 16))
-        guard width >= 176, safe.height >= 44, let split = splitLayout else { return .zero }
-        var y: CGFloat
-        if let frame = inputFrame, inputFocusedSlot != nil {
-            y = frame.minY - safe.minY >= 52 ? frame.minY - 52 : frame.minY + 8
-        } else {
-            y = (split.top.maxY + split.bottom.minY) / 2 - 22
-        }
-        y = max(safe.minY, min(y, safe.maxY - 44))
-        return CGRect(x: safe.midX - width / 2, y: y, width: width, height: 44)
+        guard DXUIGeometry.valid(safe) else { preparationView.frame = .zero; return }
+        // Initial acquisition leaves the lower region empty: explicitly show
+        // progress there, not a fake picker/app. Replacement uses the same card.
+        let preferred = (inputFrame ?? splitLayout?.bottom ?? safe).intersection(safe)
+        let region = DXUIGeometry.valid(preferred) && preferred.width >= 160 && preferred.height >= 176 ?
+            preferred : safe
+        let available = region.insetBy(dx: 16, dy: 16)
+        guard DXUIGeometry.valid(available) else { preparationView.frame = .zero; return }
+        let size = preparationView.sizeThatFits(available.size)
+        preparationView.frame = CGRect(x: region.midX - size.width / 2,
+                                       y: region.midY - size.height / 2,
+                                       width: size.width, height: size.height)
+        preparationView.layoutIfNeeded()
     }
 
     func showPicker(applications: [DXApplicationRecord], excluding: String?,
                     selection: @escaping (String) -> Void) {
         precondition(Thread.isMainThread)
         loadViewIfNeeded()
+        guard !isPreparing else { return }
         dismissPicker()
         let generation = pickerGeneration
         let controller = DXApplicationPickerViewController(applications: applications, excluding: excluding,
@@ -234,7 +306,9 @@ final class DXStageViewController: UIViewController {
         controller.willMove(toParent: nil)
         controller.view.removeFromSuperview()
         controller.removeFromParent()
-        if canDeliverIntent { UIAccessibility.post(notification: .screenChanged, argument: chrome.chooseButton) }
+        if !isPreparing && canDeliverIntent {
+            UIAccessibility.post(notification: .screenChanged, argument: chrome.chooseButton)
+        }
     }
 
     func showMessage(_ text: String) {
@@ -290,25 +364,30 @@ final class DXStageViewController: UIViewController {
     }
 
     private func requestFocus(_ slot: DXSlot) {
-        guard canDeliverIntent, picker == nil else { return }
+        guard !isPreparing, canDeliverIntent, picker == nil else { return }
         onFocus?(slot) // Intent only, NOT a claim of actual system keyboard focus.
     }
     @objc private func closeTapped() {
-        guard canDeliverIntent else { return }
+        guard canDeliverIntent else { return } // Never gated by a pending bridge operation.
         dismissPicker()
         onClose?()
     }
+    override func accessibilityPerformEscape() -> Bool {
+        guard canDeliverIntent, onClose != nil else { return false }
+        closeTapped()
+        return true
+    }
     @objc private func collapseTapped() {
-        guard canDeliverIntent else { return }
+        guard !isPreparing, canDeliverIntent else { return }
         dismissPicker()
         onCollapse?()
     }
     @objc private func chooseTapped() {
-        guard canDeliverIntent else { return }
+        guard !isPreparing, canDeliverIntent else { return }
         onChooseApplication?()
     }
     @objc private func switchInputTapped() {
-        guard canDeliverIntent, inputFocusedSlot != nil else { return }
+        guard !isPreparing, canDeliverIntent, inputFocusedSlot != nil else { return }
         onSwitchInput?()
     }
 }

@@ -36,8 +36,8 @@ class PreferencesContract(unittest.TestCase):
         self.assertIn('@objc(DXPreferencesController)',self.container)
         info=plistlib.loads((ROOT/'Preferences/Info.plist').read_bytes())
         self.assertEqual(info['NSPrincipalClass'],'DXPreferencesController')
-        self.assertEqual(info['CFBundleVersion'],'3')
-        self.assertEqual(info['CFBundleShortVersionString'],'0.1.0-alpha3')
+        self.assertEqual(info['CFBundleVersion'],'4')
+        self.assertEqual(info['CFBundleShortVersionString'],'0.1.0-alpha4')
         self.assertEqual(info['MinimumOSVersion'],'15.0')
     def test_keys_and_write_notifications_unchanged(self):
         old=subprocess.check_output(['git','show',BASE+':Preferences/DXPreferencesController.swift'],cwd=ROOT,text=True)
@@ -54,7 +54,7 @@ class PreferencesContract(unittest.TestCase):
     def test_preferences_fix_stays_unchanged_except_visible_version(self):
         alpha2='b94b66683b3351cd43cb171ed7a2551414dd6c7b'
         old=subprocess.check_output(['git','show',alpha2+':Preferences/DXPreferencesController.swift'],cwd=ROOT,text=True)
-        self.assertEqual(old.replace('0.1.0-alpha2','0.1.0-alpha3'),self.source)
+        self.assertEqual(old.replace('0.1.0-alpha2','0.1.0-alpha4'),self.source)
         header='Preferences/DynamicStageXPrefs-Bridging-Header.h'
         self.assertEqual(subprocess.check_output(['git','show',alpha2+':'+header],cwd=ROOT),
                          (ROOT/header).read_bytes())
