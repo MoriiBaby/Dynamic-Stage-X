@@ -45,7 +45,7 @@ try:
         '-DDX_SCENE_BRIDGE_TESTING=1','-I'+str(ROOT/'Sources/System'),'-I'+str(ROOT/'Tests/SceneBridge'),
         '-Wall','-Wextra','-Wno-unused-parameter',*flags,'-c',str(ROOT/source),'-o',str(output)],timeout=180)
   run(['xcrun','clang','-target',arch+'-apple-ios15.0-simulator','-isysroot',sdk,*objects,
-       '-framework','UIKit','-framework','Foundation','-framework','QuartzCore','-o',str(app/'SceneBridgeSmoke')])
+       '-framework','UIKit','-framework','Foundation','-framework','QuartzCore','-framework','CoreGraphics','-o',str(app/'SceneBridgeSmoke')])
   bundle='com.tsangbaby.dynamicstagex.scene-smoke'
   info={'CFBundleIdentifier':bundle,'CFBundleExecutable':'SceneBridgeSmoke','CFBundleName':'SceneBridgeSmoke',
         'CFBundlePackageType':'APPL','CFBundleVersion':'4','CFBundleShortVersionString':'0.1.0',
