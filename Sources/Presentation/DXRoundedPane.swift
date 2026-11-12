@@ -188,7 +188,9 @@ final class DXRoundedPane: UIView {
         // conversion.  Reconstructing a CALayer position from presentation
         // geometry is unnecessary here and can be off by the layer's bounds
         // origin, causing a visible pane to reject a local hit.
-        if layer.presentation() == nil {
+        let hasAnimations = !(layer.animationKeys() ?? []).isEmpty ||
+            !(clippingMask.animationKeys() ?? []).isEmpty
+        if !hasAnimations {
             guard let parent = superview else { return nil }
             let local = convert(point, from: parent)
             guard self.point(inside: local, with: event) else { return nil }
