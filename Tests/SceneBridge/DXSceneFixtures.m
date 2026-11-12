@@ -1,6 +1,8 @@
 #import "DXSceneFixtures.h"
 
 static NSString *DXFault;
+static NSString *DXOneShotFault;
+static void (^DXBeforeSettingsWrite)(void);
 static BOOL DXLate;
 static NSMutableArray *DXEvents;
 static DXBridgeOperation *DXPending;
@@ -9,6 +11,10 @@ static id DXLateObject;
 @implementation DXFixtureControl
 + (NSString *)fault { return DXFault; }
 + (void)setFault:(NSString *)value { DXFault=value; }
++ (NSString *)oneShotFault { return DXOneShotFault; }
++ (void)setOneShotFault:(NSString *)value { DXOneShotFault=value; }
++ (void (^)(void))beforeSettingsWrite { return DXBeforeSettingsWrite; }
++ (void)setBeforeSettingsWrite:(void (^)(void))value { DXBeforeSettingsWrite=[value copy]; }
 + (BOOL)lateContext { return DXLate; }
 + (void)setLateContext:(BOOL)value { DXLate=value; }
 + (NSMutableArray *)events { if (!DXEvents) DXEvents=[NSMutableArray array]; return DXEvents; }
@@ -22,7 +28,12 @@ static id DXLateObject;
 @end
 void DXFixtureFault(NSString *stage) {
     [DXFixtureControl.events addObject:stage];
-    if ([[DXFixtureControl.fault componentsSeparatedByString:@","] containsObject:stage])
+    NSMutableArray *once=[[DXFixtureControl.oneShotFault componentsSeparatedByString:@","] mutableCopy];
+    BOOL consume=[once containsObject:stage];
+    if (consume) {
+        [once removeObject:stage]; DXFixtureControl.oneShotFault=[once componentsJoinedByString:@","];
+    }
+    if (consume || [[DXFixtureControl.fault componentsSeparatedByString:@","] containsObject:stage])
         @throw [NSException exceptionWithName:@"DXInjectedFault" reason:@"discarded fixture exception payload" userInfo:nil];
 }
 void DXSceneBridgeTestingCheckpoint(NSString *stage, id object) {
@@ -44,9 +55,12 @@ BOOL DXSceneBridgeTestingSpringBoard(void) { return YES; }
 @implementation DXFixtureScene
 - (void)addObserver:(id)observer { DXFixtureFault(@"scene.addObserver"); [self.observers addObject:observer]; }
 - (void)removeObserver:(id)observer { DXFixtureFault(@"scene.removeObserver"); [self.observers removeObject:observer]; }
-- (void)updateSettings:(id)settings withTransitionContext:(id)context { DXFixtureFault(@"scene.updateSettings"); self.settings=settings; }
-- (void)activateWithTransitionContext:(id)context { self.active=true; }
-- (void)deactivateWithTransitionContext:(id)context { self.active=false; }
+- (void)updateSettings:(id)settings withTransitionContext:(id)context {
+    if (DXFixtureControl.beforeSettingsWrite) DXFixtureControl.beforeSettingsWrite();
+    DXFixtureFault(@"scene.updateSettings"); self.settings=settings;
+}
+- (void)activateWithTransitionContext:(id)context { DXFixtureFault(@"scene.activate"); self.active=true; }
+- (void)deactivateWithTransitionContext:(id)context { DXFixtureFault(@"scene.deactivate"); self.active=false; }
 @end
 @implementation DXFixtureRegistry
 + (instancetype)sharedInstance { static id value; static dispatch_once_t once; dispatch_once(&once,^{ value=[self new]; [value setScenes:[NSMutableDictionary dictionary]]; }); return value; }
@@ -210,7 +224,7 @@ DXFixtureScene *DXFixtureCreateScene(NSUInteger number) {
     [DXFixtureRegistry sharedInstance].scenes[scene.identifier]=scene; return scene;
 }
 void DXFixtureReset(void) {
-    DXFixtureControl.fault=nil; DXFixtureControl.pending=nil; DXFixtureControl.lateContext=NO;
+    DXFixtureControl.fault=nil; DXFixtureControl.oneShotFault=nil; DXFixtureControl.beforeSettingsWrite=nil; DXFixtureControl.pending=nil; DXFixtureControl.lateContext=NO;
     DXFixtureControl.lateBlock=nil; DXFixtureControl.lateObject=nil; DXFixtureControl.events=[NSMutableArray array];
     [[DXFixtureRegistry sharedInstance].scenes removeAllObjects];
     [DXFixtureWorkspace sharedInstance].keyboardFocusController.sceneWithFocusIncludingSpringBoard=nil;

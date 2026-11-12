@@ -2,18 +2,32 @@ import UIKit
 
 @UIApplicationMain
 final class DXStageAlpha4SmokeApp: UIResponder, UIApplicationDelegate {
-    var window: UIWindow?
-
     func application(_ application: UIApplication,
-                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        let window = UIWindow(frame: UIScreen.main.bounds)
-        window.rootViewController = UIViewController()
+                     configurationForConnecting session: UISceneSession,
+                     options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        let configuration = UISceneConfiguration(name: "StageSmoke", sessionRole: session.role)
+        configuration.delegateClass = DXStageAlpha4SmokeScene.self
+        return configuration
+    }
+}
+
+final class DXStageAlpha4SmokeScene: UIResponder, UIWindowSceneDelegate {
+    var window: UIWindow?
+    private var started = false
+
+    func scene(_ scene: UIScene, willConnectTo session: UISceneSession,
+               options connectionOptions: UIScene.ConnectionOptions) {
+        guard let scene = scene as? UIWindowScene else { return }
+        let window = UIWindow(windowScene: scene)
+        window.rootViewController = DXStageViewController()
         self.window = window
         window.makeKeyAndVisible() // Simulator TEST app only, never the production overlay.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { [weak self] in
-            self?.exercise(in: window)
-        }
-        return true
+    }
+
+    func sceneDidBecomeActive(_ scene: UIScene) {
+        guard !started, let window = window else { return }
+        started = true
+        DispatchQueue.main.async { self.exercise(in: window) }
     }
 
     private func exercise(in window: UIWindow) {

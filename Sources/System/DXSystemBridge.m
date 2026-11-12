@@ -59,6 +59,7 @@ NSNotificationName const DXSystemKeyboardFocusChangedNotification = @"com.tsangb
 @property (nonatomic) BOOL hasForeground;
 @property (nonatomic) BOOL activatedScene;
 @property (nonatomic) BOOL deactivatedScene;
+@property (nonatomic) BOOL activationRelinquished; // Native takeover permanently ends our activation rollback authority.
 @property (nonatomic) unsigned restoreMask;
 @property (nonatomic, strong) id restoreFocusScene;
 @property (nonatomic) uint64_t restoreFocusGeneration;

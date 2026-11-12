@@ -7,7 +7,9 @@
             DXPID(h.process,@selector(pid))==h.processIdentifier && DXBool(h.process,@selector(isRunning));
         // Quarantine retains the SAME own lease; no new scene/process ownership is invented.
         BOOL owner=[self.recovery containsObject:h] && (!self.handles[h.sceneIdentifier] || self.handles[h.sceneIdentifier]==h);
-        if (!h.changedSettings || !sceneOwned || !owner) { h.settingsRestored=YES; h.restoreMask=0; return nil; }
+        if (!h.changedSettings || !sceneOwned || !owner) {
+            h.activationRelinquished=YES; h.settingsRestored=YES; h.restoreMask=0; return nil;
+        }
         id current=DXSettings(h.scene);
         CGRect currentFrame=DXFrame(current);
         bool currentBackground=DXBool(current,@selector(isBackgrounded));
@@ -21,22 +23,29 @@
             (currentBackground==h.originalBackgrounded ? DXLeaseBackgrounded : 0);
         unsigned mask=DXLeaseRestoreMask(changed,equal,sceneOwned,owner);
         BOOL conflict=(changed & ~(equal | original))!=0;
+        // Activation is a separate lease: originals are valid after a prior restore or
+        // a settings submission that threw before writing. Never reclaim native takeover.
+        unsigned activationFields=h.hasForeground ? 7u : 5u;
+        if (((equal | original) & activationFields)!=activationFields ||
+            [self.frontmostApplicationIdentifier isEqualToString:h.bundleIdentifier]) h.activationRelinquished=YES;
         h.restoreMask=mask;
-        if (mask) {
-            DXCheckedIMP(current,@selector(mutableCopy),"@",""); id mutable=[current mutableCopy];
-            DXRequire(mutable && mutable!=current,DXSystemBridgeErrorOwnership,@"Restoration requires an independent mutable copy");
-            if (mask & DXLeaseFrame) DXSetFrame(mutable,h.originalFrame);
-            if (mask & DXLeaseForeground) DXSetBool(mutable,@selector(setForeground:),h.originalForeground);
-            if (mask & DXLeaseBackgrounded) DXSetBool(mutable,@selector(setBackgrounded:),h.originalBackgrounded);
-            DXWriteSettings(h.scene,mutable);
-        }
-        if (h.activatedScene && !h.deactivatedScene && (equal & 7u)==(h.hasForeground ? 7u : 5u) &&
-            ![self.frontmostApplicationIdentifier isEqualToString:h.bundleIdentifier] && DXBool(h.scene,@selector(isActive))) {
+        @try {
+            if (mask) {
+                DXCheckedIMP(current,@selector(mutableCopy),"@",""); id mutable=[current mutableCopy];
+                DXRequire(mutable && mutable!=current,DXSystemBridgeErrorOwnership,@"Restoration requires an independent mutable copy");
+                if (mask & DXLeaseFrame) DXSetFrame(mutable,h.originalFrame);
+                if (mask & DXLeaseForeground) DXSetBool(mutable,@selector(setForeground:),h.originalForeground);
+                if (mask & DXLeaseBackgrounded) DXSetBool(mutable,@selector(setBackgrounded:),h.originalBackgrounded);
+                DXWriteSettings(h.scene,mutable);
+            }
+            h.settingsRestored=YES; // Submission only; cleanupConfirmed independently acknowledges it.
+        } @catch (NSException *e) { failure=DXCleanupCaught(e,@"restore-settings"); }
+        // A settings-write exception must not skip independent activation rollback.
+        if (h.activatedScene && !h.deactivatedScene && !h.activationRelinquished && DXBool(h.scene,@selector(isActive))) {
             DXVoid1(h.scene,@selector(deactivateWithTransitionContext:),nil); h.deactivatedScene=YES;
         }
-        h.settingsRestored=YES; // Submission only; cleanupConfirmed independently acknowledges it.
         if (conflict) DXThrow(DXSystemBridgeErrorOwnership,@"Native owner superseded leased settings; conflicting fields were not overwritten");
-    } @catch (NSException *e) { failure=DXCleanupCaught(e,@"restore-settings"); }
+    } @catch (NSException *e) { failure=DXErrorWithCleanup(failure,DXCleanupCaught(e,@"restore-settings")); }
     return failure;
 }
 - (BOOL)cleanupConfirmed:(DXSystemSceneHandle *)h {
@@ -50,7 +59,7 @@
     if ((h.restoreMask & DXLeaseFrame) && !CGRectEqualToRect(DXFrame(settings),h.originalFrame)) return NO;
     if ((h.restoreMask & DXLeaseForeground) && DXBool(settings,@selector(isForeground))!=h.originalForeground) return NO;
     if ((h.restoreMask & DXLeaseBackgrounded) && DXBool(settings,@selector(isBackgrounded))!=h.originalBackgrounded) return NO;
-    if (h.deactivatedScene && DXBool(h.scene,@selector(isActive))) return NO;
+    if (h.activatedScene && !h.activationRelinquished && DXBool(h.scene,@selector(isActive))) return NO;
     if (h.restoreFocusScene && !self.isLocked && DXSceneStillRegistered(h.restoreFocusScene)) {
         id controller=DXFocusController();
         if (DXUInt64(controller,@selector(userFocusRequestGeneration))==h.restoreFocusGeneration && DXFocusedScene()!=h.restoreFocusScene) return NO;

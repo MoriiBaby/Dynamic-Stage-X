@@ -11,10 +11,13 @@ enum DXStageAlpha4Checks {
             count += 1
             if !success { failures.append(message) }
         }
-        let stage = DXStageViewController()
-        window.rootViewController = stage
+        let stage = (window.rootViewController as? DXStageViewController) ?? DXStageViewController()
+        if window.rootViewController !== stage { window.rootViewController = stage }
         window.isHidden = false
         stage.loadViewIfNeeded()
+        check(stage.view.window === window, "test stage is not attached to the visible test window")
+        check(window.windowScene?.activationState == .foregroundActive,
+              "test requires an actual foreground-active UIKit scene")
         stage.view.frame = window.bounds
         stage.view.setNeedsLayout()
         stage.view.layoutIfNeeded()

@@ -46,7 +46,9 @@ try:
   bundle='com.tsangbaby.dynamicstagex.stage-smoke'
   info={'CFBundleIdentifier':bundle,'CFBundleExecutable':'StageSmoke','CFBundleName':'StageSmoke',
         'CFBundlePackageType':'APPL','CFBundleVersion':'4','CFBundleShortVersionString':'0.1.0',
-        'MinimumOSVersion':'15.0','LSRequiresIPhoneOS':True,'UIDeviceFamily':[1],'UILaunchScreen':{}}
+        'MinimumOSVersion':'15.0','LSRequiresIPhoneOS':True,'UIDeviceFamily':[1],'UILaunchScreen':{},
+        'UIApplicationSceneManifest':{'UIApplicationSupportsMultipleScenes':False,'UISceneConfigurations':{
+          'UIWindowSceneSessionRoleApplication':[{'UISceneConfigurationName':'StageSmoke','UISceneDelegateClassName':'StageSmoke.DXStageAlpha4SmokeScene'}]}}}
   (app/'Info.plist').write_bytes(plistlib.dumps(info)); run(['codesign','--force','--sign','-',str(app)])
   run(['xcrun','simctl','install',device,str(app)])
   run(['xcrun','simctl','launch','--console','--terminate-running-process',device,bundle],allowed=(0,1),timeout=120)

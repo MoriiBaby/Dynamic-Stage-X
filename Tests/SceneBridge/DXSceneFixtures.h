@@ -20,6 +20,8 @@
 
 @interface DXFixtureControl : NSObject
 @property (class, nonatomic, strong) NSString *fault;
+@property (class, nonatomic, strong) NSString *oneShotFault;
+@property (class, nonatomic, copy) void (^beforeSettingsWrite)(void);
 @property (class, nonatomic) BOOL lateContext;
 @property (class, nonatomic, strong) NSMutableArray<NSString *> *events;
 @property (class, nonatomic, strong) DXBridgeOperation *pending;

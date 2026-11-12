@@ -200,6 +200,72 @@
         }];
     }];
 }
+// All cases drive production apply/release; no synthetic handle cleanup flags.
+- (void)activationRollback:(NSUInteger)mode {
+    self.scene.active=false;
+    [self acquire:^(DXSystemSceneHandle *handle) {
+        [self.window.rootViewController.view addSubview:handle.hostView];
+        DXFixtureSettings *original=self.scene.settings;
+        if (mode==1) {
+            // Throw before the apply write, after production has activated the scene.
+            __weak DXHarnessBridge *bridge=self.bridge;
+            DXFixtureControl.beforeSettingsWrite=^{ bridge.fixtureFrontmost=@"fixture.other"; };
+            DXFixtureControl.oneShotFault=@"scene.updateSettings,scene.deactivate";
+        }
+        [self.bridge applyFrame:CGRectInset(UIScreen.mainScreen.bounds,20,20) toHandle:handle completion:^(NSError *applyError) {
+            DXFixtureControl.beforeSettingsWrite=nil;
+            [self check:[self eventCount:@"scene.activate"]==1 && self.scene.active message:@"production apply must activate the originally inactive scene"];
+            void (^verifyRetry)(NSError *)=^(NSError *error) {
+                [self check:error && [self count:@"handles"]==0 && [self count:@"recovery"]==1 message:@"failed independent rollback must retain exactly one recovery lease"];
+                if (mode==2) {
+                    [self check:!self.scene.active && !CGRectEqualToRect(self.scene.settings.frame,original.frame) message:@"restore-write exception must not skip independent scene deactivation"];
+                } else {
+                    [self check:self.scene.active && CGRectEqualToRect(self.scene.settings.frame,original.frame) && self.scene.settings.backgrounded==original.backgrounded && self.scene.settings.foreground==original.foreground message:@"deactivate failure must retain active scene even when settings are already original"];
+                }
+                [self.bridge releaseAllScenesWithCompletion:^(NSError *retry) {
+                    [self check:!retry && !self.scene.active && [self count:@"handles"]==0 && [self count:@"recovery"]==0 message:@"explicit recovery may reach zero resources only after own activation is inactive"];
+                    [self check:[self eventCount:@"scene.deactivate"]==(mode==2 ? 1u : 2u) message:@"one-shot deactivate failure must retry despite restored or never-written settings"];
+                    [self check:CGRectEqualToRect(self.scene.settings.frame,original.frame) && self.scene.settings.backgrounded==original.backgrounded && self.scene.settings.foreground==original.foreground message:@"retry must acknowledge all original settings"];
+                    [self finishCase];
+                }];
+            };
+            if (mode==1) {
+                [self check:applyError && [applyError.userInfo[DXSceneStageKey] isEqual:@"settings-submit"] && self.scene.settings==original message:@"before-write apply exception must preserve primary stage and untouched settings"];
+                verifyRetry(applyError);
+            } else {
+                [self check:!applyError message:@"inactive-scene apply must pass production readiness before rollback injection"];
+                self.bridge.fixtureFrontmost=@"fixture.other";
+                DXFixtureControl.oneShotFault=mode==2 ? @"scene.updateSettings" : @"scene.deactivate";
+                [self.bridge releaseHandle:handle completion:verifyRetry];
+            }
+        }];
+    }];
+}
+- (void)activationNativeTakeover:(BOOL)settingsConflict {
+    self.scene.active=false;
+    [self acquire:^(DXSystemSceneHandle *handle) {
+        [self.window.rootViewController.view addSubview:handle.hostView];
+        DXFixtureSettings *original=self.scene.settings;
+        [self.bridge applyFrame:CGRectInset(UIScreen.mainScreen.bounds,20,20) toHandle:handle completion:^(NSError *applyError) {
+            [self check:!applyError && self.scene.active message:@"native takeover case requires successful production activation"];
+            if (settingsConflict) {
+                self.bridge.fixtureFrontmost=@"fixture.other";
+                self.scene.settings.frame=CGRectInset(UIScreen.mainScreen.bounds,40,40);
+            }
+            DXFixtureControl.oneShotFault=@"release.references";
+            [self.bridge releaseHandle:handle completion:^(NSError *error) {
+                [self check:error && self.scene.active && [self eventCount:@"scene.deactivate"]==0 && [self count:@"recovery"]==1 message:@"native frontmost or settings takeover must never deactivate and must retain unrelated failed cleanup"];
+                if (settingsConflict) [self check:CGRectEqualToRect(self.scene.settings.frame,CGRectInset(UIScreen.mainScreen.bounds,40,40)) message:@"native conflicting frame must not be overwritten"];
+                // Even if values later look original, rollback authority must not be reclaimed.
+                self.scene.settings=original; self.bridge.fixtureFrontmost=@"fixture.other";
+                [self.bridge releaseAllScenesWithCompletion:^(NSError *retry) {
+                    [self check:!retry && self.scene.active && [self eventCount:@"scene.deactivate"]==0 message:@"recovery retry must preserve native activation after takeover"];
+                    [self finishCase];
+                }];
+            }];
+        }];
+    }];
+}
 - (void)writeResult {
     NSDictionary *result=@{@"passed":@(self.failures.count==0),@"assertions":@(self.assertions),@"production_cleanup_cycles":@(self.cycles),@"cases":self.cases,@"failures":self.failures,
         @"scope":@"Production DXRuntime.m and DXSystemBridge.m; real simulator UIWindowScene/UIView/CALayer; private system classes and event authority are ABI-mapped doubles, NOT SpringBoard or device proof"};
@@ -210,7 +276,7 @@
     NSLog(@"SCENE_BRIDGE_RESULT %@",result); exit(self.failures.count ? 1 : 0);
 }
 - (void)runNext {
-    NSArray *names=@[@"100_cleanup_failure_cycles",@"duplicate_release",@"queued_epoch_cancel",@"pending_cancel_late_completion",@"partial_acquisition",@"late_context_callback",@"independent_readiness_timeout",@"primary_plus_cleanup",@"max3_persistent_recovery",@"global_observer_retry"];
+    NSArray *names=@[@"100_cleanup_failure_cycles",@"duplicate_release",@"queued_epoch_cancel",@"pending_cancel_late_completion",@"partial_acquisition",@"late_context_callback",@"independent_readiness_timeout",@"primary_plus_cleanup",@"max3_persistent_recovery",@"global_observer_retry",@"activation_deactivate_retry",@"activation_apply_write_failure",@"activation_restore_write_failure",@"activation_native_frontmost",@"activation_native_settings_conflict"];
     if (self.index==names.count) { [self writeResult]; return; }
     [self.cases addObject:names[self.index]]; [self setup];
     switch (self.index++) {
@@ -224,6 +290,11 @@
         case 7: [self primaryAndCleanupError]; break;
         case 8: [self capacityAndPersistentFailure]; break;
         case 9: [self globalObserverRetry]; break;
+        case 10: [self activationRollback:0]; break;
+        case 11: [self activationRollback:1]; break;
+        case 12: [self activationRollback:2]; break;
+        case 13: [self activationNativeTakeover:NO]; break;
+        case 14: [self activationNativeTakeover:YES]; break;
     }
 }
 - (void)run { self.failures=[NSMutableArray array]; self.cases=[NSMutableArray array]; [self runNext]; }
