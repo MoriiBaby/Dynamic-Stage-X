@@ -6,7 +6,7 @@ ROOT=Path(__file__).resolve().parents[1]
 BASE='e0b9f8ae40db61987ccd5b1d6f0a036e77da8b3e'
 ALLOWED={'Sources/Coordinator/DXCoordinator.swift','Sources/Coordinator/DXFailureNotice.swift',
  'Sources/Core/DXLayoutPolicy.swift','Sources/Presentation/DXStageChrome.swift',
- 'Sources/Presentation/DXStageViewController.swift','Sources/System/DXRuntime.h',
+ 'Sources/Presentation/DXStageViewController.swift','Sources/Presentation/DXRoundedPane.swift','Sources/System/DXRuntime.h',
  'Sources/System/DXRuntime.m','Sources/System/DXSystemBridge.h','Sources/System/DXSystemBridge.m'}
 NEW={'Sources/Core/DXFailurePolicy.swift','Sources/System/DXSceneAcquire.inc',
  'Sources/System/DXSceneReadiness.inc','Sources/System/DXSceneReadinessMethods.inc',

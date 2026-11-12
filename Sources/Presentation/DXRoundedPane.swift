@@ -33,7 +33,7 @@ final class DXRoundedPane: UIView {
         let center: CGPoint
         let autoresizingMask: UIView.AutoresizingMask
         let translatesAutoresizingMaskIntoConstraints: Bool
-    }
+        let isUserInteractionEnabled: Bool
     internal struct Presentation {
         let frame: CGRect
         let radius: CGFloat
@@ -99,11 +99,13 @@ final class DXRoundedPane: UIView {
         originalLayout = HostLayout(bounds: hostedView.bounds, center: hostedView.center,
                                     autoresizingMask: hostedView.autoresizingMask,
                                     translatesAutoresizingMaskIntoConstraints:
-                                        hostedView.translatesAutoresizingMaskIntoConstraints)
+                                        hostedView.translatesAutoresizingMaskIntoConstraints,
+                                    isUserInteractionEnabled: hostedView.isUserInteractionEnabled)
         // Bridge supplies a dedicated real, untransformed host, not a snapshot.
         hostedView.removeFromSuperview()
         hostedView.translatesAutoresizingMaskIntoConstraints = true
         hostedView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        hostedView.isUserInteractionEnabled = true
         self.hostedView = hostedView
         addSubview(hostedView)
         setNeedsLayout()
@@ -118,6 +120,7 @@ final class DXRoundedPane: UIView {
             if let saved = originalLayout {
                 host.autoresizingMask = saved.autoresizingMask
                 host.translatesAutoresizingMaskIntoConstraints = saved.translatesAutoresizingMaskIntoConstraints
+                host.isUserInteractionEnabled = saved.isUserInteractionEnabled
                 host.bounds = saved.bounds
                 host.center = saved.center
             }
