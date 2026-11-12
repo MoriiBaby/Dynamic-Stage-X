@@ -169,8 +169,9 @@ final class DXRoundedPane: UIView {
         guard acceptsHostedTouches, point.x.isFinite, point.y.isFinite else { return false }
         let visible = layer.presentation() ?? layer
         let local = CGPoint(x: point.x - visible.bounds.minX, y: point.y - visible.bounds.minY)
-        let path = clippingMask.presentation()?.path ?? clippingMask.path
-        return path?.contains(local, using: .winding, transform: .identity) ?? false
+        let path = clippingMask.presentation()?.path ?? clippingMask.path ??
+            DXContinuousCornerPath.make(size: bounds.size, radius: radius)
+        return path.contains(local, using: .winding, transform: .identity)
     }
 
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
