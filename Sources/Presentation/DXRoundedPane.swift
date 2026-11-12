@@ -183,7 +183,19 @@ final class DXRoundedPane: UIView {
     internal func hitTestFromParent(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         guard acceptsHostedTouches, !isHidden, isUserInteractionEnabled,
               hostedView?.superview === self else { return nil }
-        let visible = layer.presentation() ?? layer
+
+        // The normal, non-animated path must use UIKit's actual coordinate
+        // conversion.  Reconstructing a CALayer position from presentation
+        // geometry is unnecessary here and can be off by the layer's bounds
+        // origin, causing a visible pane to reject a local hit.
+        if layer.presentation() == nil {
+            guard let parent = superview else { return nil }
+            let local = convert(point, from: parent)
+            guard self.point(inside: local, with: event) else { return nil }
+            return hitTest(local, with: event)
+        }
+
+        let visible = layer.presentation()!
         guard visible.opacity > 0.01, visible.affineTransform().isIdentity,
               visible.bounds.width > 0, visible.bounds.height > 0 else { return nil }
         let origin = CGPoint(x: visible.position.x - visible.bounds.width * visible.anchorPoint.x,
