@@ -34,6 +34,8 @@ final class DXRoundedPane: UIView {
         let autoresizingMask: UIView.AutoresizingMask
         let translatesAutoresizingMaskIntoConstraints: Bool
         let isUserInteractionEnabled: Bool
+    }
+
     internal struct Presentation {
         let frame: CGRect
         let radius: CGFloat
