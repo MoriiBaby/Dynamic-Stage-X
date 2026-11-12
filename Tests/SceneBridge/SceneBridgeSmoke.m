@@ -10,11 +10,53 @@
 @property (nonatomic) NSUInteger index;
 @property (nonatomic) NSUInteger assertions;
 @property (nonatomic) NSUInteger cycles;
+@property (nonatomic, strong) NSMutableArray *completedCases;
+@property (nonatomic, copy) NSString *pendingCase;
+@property (nonatomic, copy) NSDictionary *lastProgress;
+@property (nonatomic) BOOL ended;
+- (void)progress:(NSString *)stage;
 - (void)run;
 @end
 @implementation DXSceneSuite
+- (void)save:(NSDictionary *)result name:(NSString *)name {
+    NSString *documents=NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSUserDomainMask,YES).firstObject;
+    [[NSFileManager defaultManager] createDirectoryAtPath:documents withIntermediateDirectories:YES attributes:nil error:NULL];
+    NSError *error=nil;
+    NSData *data=[NSJSONSerialization dataWithJSONObject:result options:NSJSONWritingPrettyPrinted error:&error];
+    if (!data || ![data writeToFile:[documents stringByAppendingPathComponent:name] atomically:YES]) NSLog(@"SCENE_BRIDGE_WRITE_FAILED %@ %@",name,error);
+}
+- (void)progress:(NSString *)stage {
+    // Only main reads mutable fixture/UIKit state. Watchdogs use this immutable snapshot.
+    NSMutableDictionary *state=[NSMutableDictionary dictionary];
+    @try {
+        for (NSString *key in @[@"handles",@"recovery",@"acquisitions",@"releaseAllWaiters"]) state[key]=@([self count:key]);
+        for (NSString *key in @[@"restorations",@"releaseAllInFlight",@"releaseAllScheduling",@"barriersRequested"]) state[key]=[self.bridge valueForKey:key] ?: @0;
+        state[@"scene_active"]=@(self.scene.active);
+    } @catch (NSException *e) { state[@"diagnostic_exception"]=e.name; }
+    NSArray *events=[DXFixtureControl.events copy] ?: @[];
+    NSDictionary *snapshot=@{@"passed":@NO,@"complete":@NO,@"stage":stage,@"pending_case":self.pendingCase ?: @"",
+        @"assertions":@(self.assertions),@"production_cleanup_cycles":@(self.cycles),@"cases":[self.cases copy],
+        @"completed_cases":[self.completedCases copy],@"failures":[self.failures copy],@"state":state,
+        @"events_tail":[events subarrayWithRange:NSMakeRange(events.count>40 ? events.count-40 : 0,MIN(events.count,40))]};
+    @synchronized(self) { self.lastProgress=snapshot; [self save:snapshot name:@"scene-bridge-progress.json"]; }
+    NSLog(@"SCENE_BRIDGE_PROGRESS case=%@ stage=%@ assertions=%lu cycles=%lu failures=%lu state=%@",self.pendingCase,stage,(unsigned long)self.assertions,(unsigned long)self.cycles,(unsigned long)self.failures.count,state);
+}
+- (void)watchdog:(NSUInteger)token seconds:(NSUInteger)seconds suite:(BOOL)suite {
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)seconds*NSEC_PER_SEC),dispatch_get_global_queue(QOS_CLASS_UTILITY,0),^{
+        @synchronized(self) {
+            if (self.ended || (!suite && ([self.lastProgress[@"cases"] count]!=token || ![self.lastProgress[@"pending_case"] length]))) return;
+            NSMutableDictionary *result=[self.lastProgress mutableCopy];
+            NSMutableArray *failures=[result[@"failures"] mutableCopy] ?: [NSMutableArray array];
+            [failures addObject:[NSString stringWithFormat:@"%@ watchdog expired after %lus; pending case %@",suite ? @"suite" : @"case",(unsigned long)seconds,result[@"pending_case"]]];
+            result[@"failures"]=failures; result[@"passed"]=@NO; result[@"complete"]=@NO; result[@"timed_out"]=@YES;
+            [self save:result name:@"scene-bridge-progress.json"]; [self save:result name:@"scene-bridge-result.json"];
+            NSLog(@"SCENE_BRIDGE_TIMEOUT %@",result); exit(2);
+        }
+    });
+}
 - (void)check:(BOOL)value message:(NSString *)message {
-    self.assertions+=1; if (!value) [self.failures addObject:message];
+    self.assertions+=1;
+    if (!value) { [self.failures addObject:message]; [self progress:[@"assertion_failed: " stringByAppendingString:message]]; }
 }
 - (NSUInteger)count:(NSString *)key { return [[self.bridge valueForKey:key] count]; }
 - (NSUInteger)eventCount:(NSString *)event { return [[DXFixtureControl.events filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF == %@",event]] count]; }
@@ -32,6 +74,9 @@
 }
 - (void)finishCase {
     [self check:[self count:@"handles"]==0 && [self count:@"recovery"]==0 message:@"case must finish with no own active/recovery resources"];
+    [self.completedCases addObject:self.pendingCase];
+    [self progress:@"case_complete"];
+    self.pendingCase=nil; [self progress:@"between_cases"];
     dispatch_async(dispatch_get_main_queue(),^{ [self runNext]; });
 }
 - (void)stress:(NSUInteger)cycle {
@@ -52,6 +97,7 @@
                     [self check:[self count:@"handles"]==0 && [self count:@"recovery"]==0 message:@"no registry growth across 100 actual production cleanup cycles"];
                     [self check:self.scene.valid && self.scene.clientProcess.running message:@"system scene/process must survive cleanup"];
                     self.cycles=cycle+1;
+                    if (self.cycles%10==0) [self progress:@"cleanup_cycles"];
                     dispatch_async(dispatch_get_main_queue(),^{ [self stress:cycle+1]; });
                 }];
             }];
@@ -202,6 +248,7 @@
 }
 // All cases drive production apply/release; no synthetic handle cleanup flags.
 - (void)activationRollback:(NSUInteger)mode {
+    [self progress:@"activation_begin"];
     self.scene.active=false;
     [self acquire:^(DXSystemSceneHandle *handle) {
         [self.window.rootViewController.view addSubview:handle.hostView];
@@ -213,9 +260,11 @@
             DXFixtureControl.oneShotFault=@"scene.updateSettings,scene.deactivate";
         }
         [self.bridge applyFrame:CGRectInset(UIScreen.mainScreen.bounds,20,20) toHandle:handle completion:^(NSError *applyError) {
+            [self progress:@"activation_apply_callback"];
             DXFixtureControl.beforeSettingsWrite=nil;
             [self check:[self eventCount:@"scene.activate"]==1 && self.scene.active message:@"production apply must activate the originally inactive scene"];
             void (^verifyRetry)(NSError *)=^(NSError *error) {
+                [self progress:@"activation_release_callback"];
                 [self check:error && [self count:@"handles"]==0 && [self count:@"recovery"]==1 message:@"failed independent rollback must retain exactly one recovery lease"];
                 if (mode==2) {
                     [self check:!self.scene.active && !CGRectEqualToRect(self.scene.settings.frame,original.frame) message:@"restore-write exception must not skip independent scene deactivation"];
@@ -223,6 +272,7 @@
                     [self check:self.scene.active && CGRectEqualToRect(self.scene.settings.frame,original.frame) && self.scene.settings.backgrounded==original.backgrounded && self.scene.settings.foreground==original.foreground message:@"deactivate failure must retain active scene even when settings are already original"];
                 }
                 [self.bridge releaseAllScenesWithCompletion:^(NSError *retry) {
+                    [self progress:@"activation_retry_callback"];
                     [self check:!retry && !self.scene.active && [self count:@"handles"]==0 && [self count:@"recovery"]==0 message:@"explicit recovery may reach zero resources only after own activation is inactive"];
                     [self check:[self eventCount:@"scene.deactivate"]==(mode==2 ? 1u : 2u) message:@"one-shot deactivate failure must retry despite restored or never-written settings"];
                     [self check:CGRectEqualToRect(self.scene.settings.frame,original.frame) && self.scene.settings.backgrounded==original.backgrounded && self.scene.settings.foreground==original.foreground message:@"retry must acknowledge all original settings"];
@@ -242,11 +292,13 @@
     }];
 }
 - (void)activationNativeTakeover:(BOOL)settingsConflict {
+    [self progress:@"activation_begin"];
     self.scene.active=false;
     [self acquire:^(DXSystemSceneHandle *handle) {
         [self.window.rootViewController.view addSubview:handle.hostView];
         DXFixtureSettings *original=self.scene.settings;
         [self.bridge applyFrame:CGRectInset(UIScreen.mainScreen.bounds,20,20) toHandle:handle completion:^(NSError *applyError) {
+            [self progress:@"takeover_apply_callback"];
             [self check:!applyError && self.scene.active message:@"native takeover case requires successful production activation"];
             if (settingsConflict) {
                 self.bridge.fixtureFrontmost=@"fixture.other";
@@ -267,18 +319,23 @@
     }];
 }
 - (void)writeResult {
-    NSDictionary *result=@{@"passed":@(self.failures.count==0),@"assertions":@(self.assertions),@"production_cleanup_cycles":@(self.cycles),@"cases":self.cases,@"failures":self.failures,
-        @"scope":@"Production DXRuntime.m and DXSystemBridge.m; real simulator UIWindowScene/UIView/CALayer; private system classes and event authority are ABI-mapped doubles, NOT SpringBoard or device proof"};
-    NSString *documents=NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSUserDomainMask,YES).firstObject;
-    [[NSFileManager defaultManager] createDirectoryAtPath:documents withIntermediateDirectories:YES attributes:nil error:NULL];
-    NSData *data=[NSJSONSerialization dataWithJSONObject:result options:NSJSONWritingPrettyPrinted error:NULL];
-    [data writeToFile:[documents stringByAppendingPathComponent:@"scene-bridge-result.json"] atomically:YES];
-    NSLog(@"SCENE_BRIDGE_RESULT %@",result); exit(self.failures.count ? 1 : 0);
+    @synchronized(self) {
+        self.ended=YES;
+        [self progress:@"suite_complete"];
+        NSMutableDictionary *result=[self.lastProgress mutableCopy];
+        result[@"passed"]=@(self.failures.count==0); result[@"complete"]=@YES;
+        result[@"scope"]=@"Production DXRuntime.m and DXSystemBridge.m; real simulator UIWindowScene/UIView/CALayer; private system classes and event authority are ABI-mapped doubles, NOT SpringBoard or device proof";
+        [self save:result name:@"scene-bridge-result.json"];
+        NSLog(@"SCENE_BRIDGE_RESULT %@",result); exit(self.failures.count ? 1 : 0);
+    }
 }
 - (void)runNext {
     NSArray *names=@[@"100_cleanup_failure_cycles",@"duplicate_release",@"queued_epoch_cancel",@"pending_cancel_late_completion",@"partial_acquisition",@"late_context_callback",@"independent_readiness_timeout",@"primary_plus_cleanup",@"max3_persistent_recovery",@"global_observer_retry",@"activation_deactivate_retry",@"activation_apply_write_failure",@"activation_restore_write_failure",@"activation_native_frontmost",@"activation_native_settings_conflict"];
     if (self.index==names.count) { [self writeResult]; return; }
-    [self.cases addObject:names[self.index]]; [self setup];
+    self.pendingCase=names[self.index]; [self.cases addObject:self.pendingCase];
+    [self progress:@"case_start"];
+    [self watchdog:self.index+1 seconds:self.index==0 ? 90 : 30 suite:NO];
+    [self setup]; [self progress:@"setup_complete"];
     switch (self.index++) {
         case 0: [self stress:0]; break;
         case 1: [self duplicateRelease]; break;
@@ -297,7 +354,10 @@
         case 14: [self activationNativeTakeover:YES]; break;
     }
 }
-- (void)run { self.failures=[NSMutableArray array]; self.cases=[NSMutableArray array]; [self runNext]; }
+- (void)run {
+    self.failures=[NSMutableArray array]; self.cases=[NSMutableArray array]; self.completedCases=[NSMutableArray array];
+    [self progress:@"suite_start"]; [self watchdog:0 seconds:180 suite:YES]; [self runNext];
+}
 @end
 
 @interface DXSceneDelegate : UIResponder <UIWindowSceneDelegate>

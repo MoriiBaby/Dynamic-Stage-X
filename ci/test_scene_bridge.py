@@ -13,7 +13,17 @@ EVIDENCE=SOURCES+['Sources/System/DXRuntime.h','Sources/System/DXSystemBridge.h'
 EVIDENCE += [str(p.relative_to(ROOT)) for p in sorted((ROOT/'Sources/System').glob('*.inc'))]
 commands=[]
 def run(command, timeout=180, allowed=(0,)):
- p=subprocess.run(command,cwd=ROOT,capture_output=True,text=True,timeout=timeout)
+ try:
+  p=subprocess.run(command,cwd=ROOT,capture_output=True,text=True,timeout=timeout)
+ except subprocess.TimeoutExpired as error:
+  # TimeoutExpired can contain bytes even with text=True. Preserve console output.
+  text=lambda value: value.decode('utf-8',errors='replace') if isinstance(value,bytes) else (value or '')
+  stdout,stderr=text(error.stdout),text(error.stderr)
+  commands.append({'command':command,'returncode':None,'timed_out':True,'timeout_seconds':timeout,
+                   'stdout':stdout,'stderr':stderr})
+  (OUT/'scene-bridge-commands.json').write_text(json.dumps(commands,indent=2)+'\n')
+  print(stdout[-20000:]+stderr[-20000:],flush=True)
+  raise
  commands.append({'command':command,'returncode':p.returncode,'stdout':p.stdout[-20000:],'stderr':p.stderr[-20000:]})
  (OUT/'scene-bridge-commands.json').write_text(json.dumps(commands,indent=2)+'\n')
  if p.returncode not in allowed:
